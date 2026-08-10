@@ -15,18 +15,18 @@ export default async function LeaderboardPage({
   const entries = await getLeaderboard(game, period);
 
   return (
-    <main className="mx-auto max-w-2xl p-6 flex flex-col gap-8">
+    <main className="mx-auto max-w-2xl p-4 flex flex-col gap-5">
       <div>
-        <h1 className="text-2xl font-semibold mb-4">Leaderboard</h1>
+        <h1 className="text-2xl font-semibold mb-3">Leaderboard</h1>
 
         <LeaderboardFilters game={game} period={period} />
 
         {entries.length === 0 ? (
-          <p className="tactile-card text-sm p-4 text-center" style={{ color: "var(--muted)" }}>
+          <p className="tactile-card text-sm p-3 text-center" style={{ color: "var(--muted)" }}>
             No confirmed matches yet for this filter.
           </p>
         ) : (
-          <ol className="flex flex-col gap-2">
+          <ol className="flex flex-col gap-1.5">
             {entries.map((e, i) => (
               <LeaderboardRow key={e.playerId} rank={i + 1} name={e.name} wins={e.wins} />
             ))}
@@ -34,7 +34,7 @@ export default async function LeaderboardPage({
         )}
       </div>
 
-      <div className="tactile-card p-4">
+      <div className="tactile-card p-3">
         <HeadToHead />
       </div>
     </main>
@@ -59,24 +59,24 @@ function LeaderboardRow({ rank, name, wins }: { rank: number; name: string; wins
   const medal = MEDAL_COLORS[rank];
   return (
     <li
-      className="flex items-center gap-3 px-3 py-2.5"
+      className="flex items-center gap-2 px-2.5 py-1.5"
       style={{
         background: "var(--card)",
         color: "var(--card-foreground)",
         borderRadius: "var(--radius-card)",
         boxShadow: "var(--shadow-raised)",
-        border: medal ? `3px solid ${medal[1]}` : "var(--pixel-border)",
+        border: medal ? `2px solid ${medal[1]}` : "2px solid var(--accent-teal)",
       }}
     >
       <RankBadge rank={rank} medal={medal} />
       <span
-        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
         style={{ background: avatarColor(name), color: "#23222b" }}
       >
         {name.slice(0, 1).toUpperCase()}
       </span>
-      <span className="flex-1 truncate">{name}</span>
-      <span className="font-semibold text-right" style={{ minWidth: 32 }}>
+      <span className="flex-1 truncate text-sm">{name}</span>
+      <span className="font-semibold text-right text-sm" style={{ minWidth: 20 }}>
         {wins}
       </span>
       <span className="text-xs" style={{ color: "var(--muted)" }}>
@@ -89,7 +89,7 @@ function LeaderboardRow({ rank, name, wins }: { rank: number; name: string; wins
 function RankBadge({ rank, medal }: { rank: number; medal?: [string, string] }) {
   if (!medal) {
     return (
-      <span className="w-6 text-center text-sm shrink-0" style={{ color: "var(--muted)" }}>
+      <span className="w-5 text-center text-xs shrink-0" style={{ color: "var(--muted)" }}>
         {rank}
       </span>
     );
@@ -97,7 +97,7 @@ function RankBadge({ rank, medal }: { rank: number; medal?: [string, string] }) 
   const [light, dark] = medal;
   return (
     <span
-      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
       style={{
         background: `linear-gradient(145deg, ${light}, ${dark})`,
         boxShadow: `var(--shadow-raised), inset 0 1px 1px rgba(255,255,255,0.5)`,

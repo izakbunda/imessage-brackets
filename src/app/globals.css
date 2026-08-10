@@ -94,8 +94,6 @@ h2 {
   box-shadow: var(--shadow-inset);
   font-family: var(--font-pixel-body), system-ui, sans-serif;
   font-size: 16px;
-  padding-top: 0.6em;
-  padding-bottom: 0.6em;
 }
 
 .tactile-input::placeholder {

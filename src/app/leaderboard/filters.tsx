@@ -30,14 +30,14 @@ export function LeaderboardFilters({
   }
 
   return (
-    <div className="flex flex-col gap-3 mb-5">
+    <div className="flex flex-col gap-2 mb-3">
       <select
         value={game ?? ""}
         onChange={(e) => {
           hapticTap();
           navigate({ game: e.target.value || null });
         }}
-        className="tactile-input px-3 py-2.5"
+        className="tactile-input px-2.5 py-1.5 text-sm"
       >
         <option value="">All games</option>
         {GAMES.map((g) => (
@@ -66,7 +66,7 @@ export function LeaderboardFilters({
                 hapticTap();
                 navigate({ period: p.value });
               }}
-              className="flex-1 px-2 py-2 text-sm font-medium"
+              className="flex-1 px-2 py-1.5 text-xs font-medium"
               style={{
                 background: active ? "var(--accent-teal)" : "transparent",
                 color: active ? "#23222b" : "var(--foreground)",
