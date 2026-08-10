@@ -2,7 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { upsertPlayer, normalizePhoneNumber } from "@/lib/players";
+import { upsertPlayer } from "@/lib/players";
+import { broadcastRoomChanged } from "@/lib/realtime";
 
 export type JoinState = { error?: string };
 
@@ -80,5 +81,6 @@ export async function joinRoom(
     return { error: "Could not join this room, please try again." };
   }
 
+  await broadcastRoomChanged(room.id);
   redirect(`/room/${code}/player/${roomPlayer.player_link_token}`);
 }

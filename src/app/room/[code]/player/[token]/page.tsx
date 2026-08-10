@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { LobbyClient } from "./lobby-client";
 
 export default async function RoomPlayerPage({
   params,
@@ -16,27 +17,47 @@ export default async function RoomPlayerPage({
 
   if (!room) notFound();
 
-  const { data: roomPlayer } = await supabaseAdmin
+  const { data: roomPlayers } = await supabaseAdmin
     .from("room_players")
-    .select("*, players(*)")
+    .select("id, player_id, seed_position, player_link_token, players(name, photo_url)")
     .eq("room_id", room.id)
-    .eq("player_link_token", token)
-    .maybeSingle();
+    .order("joined_at", { ascending: true });
 
-  if (!roomPlayer) notFound();
+  const viewer = roomPlayers?.find((p) => p.player_link_token === token);
+  if (!viewer) notFound();
+
+  const isCreator = viewer.player_id === room.creator_player_id;
+
+  const safeRoomPlayers = (roomPlayers ?? []).map((p) => ({
+    id: p.id,
+    player_id: p.player_id,
+    seed_position: p.seed_position,
+    name: p.players?.name ?? "Unknown",
+    photo_url: p.players?.photo_url ?? null,
+  }));
 
   return (
     <main className="mx-auto max-w-md p-6">
-      <h1 className="text-2xl font-semibold mb-2">{room.game}</h1>
+      <h1 className="text-2xl font-semibold mb-1">{room.game}</h1>
       <p className="text-neutral-500 mb-6">
         Room <span className="font-mono">{room.code}</span> — {room.status}
       </p>
-      <p>
-        You&apos;re in as <strong>{roomPlayer.players?.name}</strong>.
+      <p className="mb-4">
+        You&apos;re in as <strong>{viewer.players?.name}</strong>
+        {isCreator ? " (creator)" : ""}.
       </p>
-      <p className="text-sm text-neutral-500 mt-4">
-        Lobby (live roster, lock/cancel, bracket) lands in the next step.
-      </p>
+      <LobbyClient
+        room={{
+          id: room.id,
+          code: room.code,
+          status: room.status,
+          seeding_mode: room.seeding_mode,
+          player_count: room.player_count,
+        }}
+        roomPlayers={safeRoomPlayers}
+        isCreator={isCreator}
+        playerToken={token}
+      />
     </main>
   );
 }
