@@ -6,7 +6,7 @@ const PLAYER_COUNT_OPTIONS = [2, 4, 8, 16, 32];
 
 export default function CreateRoomPage() {
   return (
-    <main className="mx-auto max-w-md p-6">
+    <main className="w-full mx-auto max-w-md p-6">
       <h1 className="text-2xl font-semibold mb-6">Create a bracket</h1>
       <form action={createRoom} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">

@@ -25,7 +25,7 @@ export default async function BracketPage({
     .order("slot_in_round");
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
+    <main className="w-full mx-auto max-w-2xl p-6">
       <h1 className="text-2xl font-semibold mb-1">{room.game}</h1>
       <p className="muted mb-6">
         Room <span className="font-mono">{room.code}</span> — {room.status}

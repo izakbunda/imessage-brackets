@@ -15,7 +15,7 @@ export default async function LeaderboardPage({
   const entries = await getLeaderboard(game, period);
 
   return (
-    <main className="mx-auto max-w-2xl p-4 flex flex-col gap-5">
+    <main className="w-full mx-auto max-w-2xl p-4 flex flex-col gap-5">
       <div>
         <h1 className="text-2xl font-semibold mb-3">Leaderboard</h1>
 
