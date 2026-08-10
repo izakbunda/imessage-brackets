@@ -1,0 +1,80 @@
+import { createRoom } from "./actions";
+import { GAMES } from "@/lib/games";
+
+const PLAYER_COUNT_OPTIONS = [2, 4, 8, 16, 32];
+
+export default function CreateRoomPage() {
+  return (
+    <main className="mx-auto max-w-md p-6">
+      <h1 className="text-2xl font-semibold mb-6">Create a bracket</h1>
+      <form action={createRoom} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Your name</span>
+          <input
+            name="name"
+            required
+            className="border rounded-md px-3 py-2"
+            placeholder="Izak"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Your phone number</span>
+          <input
+            name="phoneNumber"
+            required
+            type="tel"
+            className="border rounded-md px-3 py-2"
+            placeholder="(555) 123-4567"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Game</span>
+          <select name="game" required className="border rounded-md px-3 py-2">
+            {GAMES.map((game) => (
+              <option key={game} value={game}>
+                {game}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Number of players</span>
+          <select
+            name="playerCount"
+            required
+            defaultValue={4}
+            className="border rounded-md px-3 py-2"
+          >
+            {PLAYER_COUNT_OPTIONS.map((count) => (
+              <option key={count} value={count}>
+                {count}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <fieldset className="flex flex-col gap-1">
+          <legend className="text-sm font-medium mb-1">Seeding</legend>
+          <label className="flex items-center gap-2">
+            <input type="radio" name="seedingMode" value="auto" defaultChecked />
+            Automatic (random)
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="radio" name="seedingMode" value="manual" />
+            Manual (I&apos;ll set it myself)
+          </label>
+        </fieldset>
+
+        <button
+          type="submit"
+          className="mt-2 bg-blue-500 text-white rounded-md px-4 py-2 font-medium"
+        >
+          Create room
+        </button>
+      </form>
+    </main>
+  );
+}
