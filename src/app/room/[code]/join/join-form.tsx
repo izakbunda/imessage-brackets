@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { joinRoom, type JoinState } from "./actions";
 import { TactileButton } from "@/components/tactile-button";
+import { ProfileFields } from "@/components/profile-fields";
 
 const initialState: JoinState = {};
 
@@ -14,21 +15,7 @@ export function JoinForm({ code }: { code: string }) {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Your name</span>
-        <input name="name" required className="tactile-input px-3 py-2.5" />
-      </label>
-
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Your phone number</span>
-        <input
-          name="phoneNumber"
-          required
-          type="tel"
-          className="tactile-input px-3 py-2.5"
-          placeholder="(555) 123-4567"
-        />
-      </label>
+      <ProfileFields />
 
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">Photo (optional)</span>

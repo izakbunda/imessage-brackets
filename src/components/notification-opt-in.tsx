@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { savePushSubscription } from "@/app/room/[code]/push-actions";
 import { TactileButton } from "@/components/tactile-button";
+import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -16,6 +18,7 @@ export function NotificationOptIn({ token }: { token: string }) {
     "checking"
   );
   const [error, setError] = useState<string | null>(null);
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
@@ -62,7 +65,16 @@ export function NotificationOptIn({ token }: { token: string }) {
   if (status === "checking" || status === "unsupported" || status === "on") return null;
 
   return (
-    <div className="tactile-card p-3 flex flex-col gap-2 text-sm">
+    <motion.div
+      animate={
+        status === "off" && !reducedMotion
+          ? { boxShadow: ["var(--shadow-raised)", "0 0 0 6px rgba(79,158,148,0.25)", "var(--shadow-raised)"] }
+          : undefined
+      }
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      className="tactile-card p-3 flex flex-col gap-2 text-sm"
+      style={{ border: status === "off" ? "3px solid var(--accent-teal)" : undefined }}
+    >
       {status === "denied" ? (
         <p className="muted">
           Notifications are blocked for this app — enable them in your phone&apos;s settings to
@@ -70,13 +82,14 @@ export function NotificationOptIn({ token }: { token: string }) {
         </p>
       ) : (
         <>
-          <p>Turn on notifications to know when your match is live.</p>
+          <p className="font-medium">🔔 One more thing — turn on match alerts</p>
+          <p className="muted">You&apos;ll know the moment it&apos;s your turn.</p>
           <TactileButton onClick={enable} className="self-start px-3 py-1.5">
             Enable notifications
           </TactileButton>
         </>
       )}
       {error && <p className="error-text">{error}</p>}
-    </div>
+    </motion.div>
   );
 }

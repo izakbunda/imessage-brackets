@@ -1,6 +1,7 @@
 import { createRoom } from "./actions";
 import { GAMES } from "@/lib/games";
 import { TactileButton } from "@/components/tactile-button";
+import { ProfileFields } from "@/components/profile-fields";
 
 const PLAYER_COUNT_OPTIONS = [2, 4, 8, 16, 32];
 
@@ -9,21 +10,7 @@ export default function CreateRoomPage() {
     <main className="w-full mx-auto max-w-md p-6">
       <h1 className="text-2xl font-semibold mb-6">Create a bracket</h1>
       <form action={createRoom} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Your name</span>
-          <input name="name" required className="tactile-input px-3 py-2.5" placeholder="Izak" />
-        </label>
-
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Your phone number</span>
-          <input
-            name="phoneNumber"
-            required
-            type="tel"
-            className="tactile-input px-3 py-2.5"
-            placeholder="(555) 123-4567"
-          />
-        </label>
+        <ProfileFields />
 
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Game</span>

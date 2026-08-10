@@ -338,10 +338,19 @@ function MatchSheet({
   const [score1, setScore1] = useState("");
   const [score2, setScore2] = useState("");
   const [opponent, setOpponent] = useState<{ name: string; phone: string } | null>(null);
+  const [showForm, setShowForm] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
 
   const alreadyReported = !!match.reported_by_room_player_id;
   const reportedByMe = match.reported_by_room_player_id === viewerRoomPlayerId;
+
+  function openForm(prefillWinner?: string | null) {
+    setSelectedWinner(prefillWinner ?? null);
+    setScore1(match.player_1_score !== null ? String(match.player_1_score) : "");
+    setScore2(match.player_2_score !== null ? String(match.player_2_score) : "");
+    setError(null);
+    setShowForm(true);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -406,7 +415,7 @@ function MatchSheet({
         </a>
       )}
 
-      {alreadyReported && !reportedByMe && (
+      {alreadyReported && !reportedByMe && !showForm && (
         <>
           <p className="text-sm">
             <strong>{match.winner_room_player_id === match.room_player_1_id ? player1Name : player2Name}</strong>{" "}
@@ -417,31 +426,52 @@ function MatchSheet({
             . Confirm?
           </p>
           {error && <p className="text-sm error-text">{error}</p>}
+          <div className="flex gap-2">
+            <TactileButton
+              variant="secondary"
+              disabled={pending}
+              onClick={() => openForm(null)}
+            >
+              That&apos;s not right
+            </TactileButton>
+            <TactileButton
+              disabled={pending}
+              onClick={() =>
+                run(
+                  () => confirmMatchResult(code, token, match.id),
+                  match.winner_room_player_id === viewerRoomPlayerId
+                )
+              }
+            >
+              Confirm result
+            </TactileButton>
+          </div>
+        </>
+      )}
+
+      {alreadyReported && reportedByMe && !showForm && (
+        <>
+          <p className="text-sm muted">Waiting for your opponent to confirm.</p>
+          {error && <p className="text-sm error-text">{error}</p>}
           <TactileButton
+            variant="secondary"
             disabled={pending}
-            onClick={() =>
-              run(
-                () => confirmMatchResult(code, token, match.id),
-                match.winner_room_player_id === viewerRoomPlayerId
-              )
-            }
+            onClick={() => openForm(match.winner_room_player_id)}
+            className="self-start"
           >
-            Confirm result
+            Edit report
           </TactileButton>
         </>
       )}
 
-      {alreadyReported && reportedByMe && (
-        <p className="text-sm muted">Waiting for your opponent to confirm.</p>
-      )}
-
-      {!alreadyReported && (
+      {(!alreadyReported || showForm) && (
         <>
           <fieldset className="flex flex-col gap-1">
             <label className="flex items-center gap-2">
               <input
                 type="radio"
                 name="winner"
+                checked={selectedWinner === match.room_player_1_id}
                 onChange={() => setSelectedWinner(match.room_player_1_id)}
               />
               {player1Name} won
@@ -450,6 +480,7 @@ function MatchSheet({
               <input
                 type="radio"
                 name="winner"
+                checked={selectedWinner === match.room_player_2_id}
                 onChange={() => setSelectedWinner(match.room_player_2_id)}
               />
               {player2Name} won
@@ -474,23 +505,37 @@ function MatchSheet({
             />
           </div>
           {error && <p className="text-sm error-text">{error}</p>}
-          <TactileButton
-            disabled={pending || !selectedWinner}
-            onClick={() =>
-              run(() =>
-                reportMatchResult(
-                  code,
-                  token,
-                  match.id,
-                  selectedWinner!,
-                  score1 === "" ? null : Number(score1),
-                  score2 === "" ? null : Number(score2)
+          <div className="flex gap-2">
+            {showForm && (
+              <TactileButton
+                variant="secondary"
+                disabled={pending}
+                onClick={() => {
+                  setShowForm(false);
+                  setError(null);
+                }}
+              >
+                Cancel
+              </TactileButton>
+            )}
+            <TactileButton
+              disabled={pending || !selectedWinner}
+              onClick={() =>
+                run(() =>
+                  reportMatchResult(
+                    code,
+                    token,
+                    match.id,
+                    selectedWinner!,
+                    score1 === "" ? null : Number(score1),
+                    score2 === "" ? null : Number(score2)
+                  )
                 )
-              )
-            }
-          >
-            Report result
-          </TactileButton>
+              }
+            >
+              {showForm ? "Save result" : "Report result"}
+            </TactileButton>
+          </div>
         </>
       )}
     </motion.div>

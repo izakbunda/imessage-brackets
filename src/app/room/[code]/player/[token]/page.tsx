@@ -72,6 +72,11 @@ export default async function RoomPlayerPage({
   return (
     <main className="w-full mx-auto max-w-md p-6">
       <SaveActiveRoom code={code} token={token} game={room.game} status={room.status} />
+
+      <div className="mb-4">
+        <NotificationOptIn token={token} />
+      </div>
+
       <h1 className="text-2xl font-semibold mb-1">{room.game}</h1>
       <p className="muted mb-6">
         Room <span className="font-mono">{room.code}</span> — {room.status}
@@ -80,10 +85,6 @@ export default async function RoomPlayerPage({
         You&apos;re in as <strong>{viewer.players?.name}</strong>
         {isCreator ? " (creator)" : ""}.
       </p>
-
-      <div className="mb-4">
-        <NotificationOptIn token={token} />
-      </div>
 
       {room.status === "lobby" ? (
         <LobbyClient
