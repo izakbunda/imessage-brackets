@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { BracketCanvas } from "@/components/bracket-canvas";
@@ -28,12 +27,9 @@ export default async function BracketPage({
   return (
     <main className="mx-auto max-w-2xl p-6">
       <h1 className="text-2xl font-semibold mb-1">{room.game}</h1>
-      <p className="text-neutral-500 mb-2">
+      <p className="text-neutral-500 mb-6">
         Room <span className="font-mono">{room.code}</span> — {room.status}
       </p>
-      <Link href="/leaderboard" className="text-sm text-blue-600 underline mb-6 inline-block">
-        View leaderboard
-      </Link>
 
       {room.status === "lobby" && (
         <p className="text-sm text-neutral-500">Bracket hasn&apos;t been generated yet.</p>
