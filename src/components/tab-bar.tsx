@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { hapticTap } from "@/lib/haptics";
 
-const PX = 2.5;
+const PX = 2;
 
 function PixelIcon({ grid, color }: { grid: string[]; color: string }) {
   return (
@@ -63,34 +63,41 @@ export function TabBar() {
   const pathname = usePathname();
 
   return (
-    <nav
-      className="fixed bottom-0 inset-x-0 flex z-50"
-      style={{
-        background: "var(--background-alt)",
-        borderTop: "3px solid var(--accent-teal)",
-        paddingBottom: "env(safe-area-inset-bottom)",
-      }}
+    <div
+      className="fixed inset-x-4 flex justify-center z-50 pointer-events-none"
+      style={{ bottom: "calc(10px + env(safe-area-inset-bottom))" }}
     >
-      {TABS.map(({ href, label, grid, color }) => {
-        const active = pathname === href;
-        return (
-          <Link
-            key={href}
-            href={href}
-            onClick={hapticTap}
-            className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-transform active:scale-90"
-            style={{
-              fontFamily: "var(--font-pixel-display), monospace",
-              fontSize: 9,
-              color: active ? color : "var(--muted)",
-              opacity: active ? 1 : 0.7,
-            }}
-          >
-            <PixelIcon grid={grid} color={active ? color : "var(--muted)"} />
-            {label}
-          </Link>
-        );
-      })}
-    </nav>
+      <nav
+        className="flex gap-1 px-1.5 py-1.5 w-full max-w-sm pointer-events-auto"
+        style={{
+          background: "var(--background-alt)",
+          border: "3px solid var(--accent-teal)",
+          borderRadius: 999,
+          boxShadow: "var(--shadow-raised-lg)",
+        }}
+      >
+        {TABS.map(({ href, label, grid, color }) => {
+          const active = pathname === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={hapticTap}
+              className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 transition-transform active:scale-90"
+              style={{
+                fontFamily: "var(--font-pixel-display), monospace",
+                fontSize: 8,
+                color: active ? "#23222b" : "var(--muted)",
+                background: active ? color : "transparent",
+                borderRadius: 999,
+              }}
+            >
+              <PixelIcon grid={grid} color={active ? "#23222b" : "var(--muted)"} />
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }
