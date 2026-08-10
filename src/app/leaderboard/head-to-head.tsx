@@ -39,7 +39,14 @@ export function HeadToHead() {
 
       {result && "error" in result && <p className="text-sm error-text">{result.error}</p>}
       {result && !("error" in result) && (
-        <div className="tactile-card p-3 text-sm">
+        <div
+          className="p-3 text-sm"
+          style={{
+            borderRadius: "var(--radius-card)",
+            border: "2px solid var(--border-subtle)",
+            background: "var(--background)",
+          }}
+        >
           {result.totalMatches === 0 ? (
             <p>
               {result.playerAName} and {result.playerBName} haven&apos;t played each other yet.

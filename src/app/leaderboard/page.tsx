@@ -1,6 +1,7 @@
 import { GAMES } from "@/lib/games";
 import { getLeaderboard, type Period } from "./queries";
 import { HeadToHead } from "./head-to-head";
+import { LeaderboardFilters } from "./filters";
 
 export default async function LeaderboardPage({
   searchParams,
@@ -13,86 +14,30 @@ export default async function LeaderboardPage({
 
   const entries = await getLeaderboard(game, period);
 
-  function filterUrl(next: { game?: string | null; period?: string }) {
-    const qp = new URLSearchParams();
-    const nextGame = next.game !== undefined ? next.game : game;
-    const nextPeriod = next.period ?? period;
-    if (nextGame) qp.set("game", nextGame);
-    if (nextPeriod !== "all") qp.set("period", nextPeriod);
-    const qs = qp.toString();
-    return `/leaderboard${qs ? `?${qs}` : ""}`;
-  }
-
   return (
     <main className="mx-auto max-w-2xl p-6 flex flex-col gap-8">
       <div>
         <h1 className="text-2xl font-semibold mb-4">Leaderboard</h1>
 
-        <div className="flex gap-2 flex-wrap mb-3 text-sm">
-          <FilterChip href={filterUrl({ game: null })} active={!game}>
-            All
-          </FilterChip>
-          {GAMES.map((g) => (
-            <FilterChip key={g} href={filterUrl({ game: g })} active={game === g}>
-              {g}
-            </FilterChip>
-          ))}
-        </div>
-
-        <div className="flex gap-2 flex-wrap text-sm mb-6">
-          {(["all", "month", "year"] as const).map((p) => (
-            <FilterChip key={p} href={filterUrl({ period: p })} active={period === p}>
-              {p === "all" ? "All-time" : p === "month" ? "This month" : "This year"}
-            </FilterChip>
-          ))}
-        </div>
+        <LeaderboardFilters game={game} period={period} />
 
         {entries.length === 0 ? (
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
+          <p className="tactile-card text-sm p-4 text-center" style={{ color: "var(--muted)" }}>
             No confirmed matches yet for this filter.
           </p>
         ) : (
           <ol className="flex flex-col gap-2">
             {entries.map((e, i) => (
-              <li key={e.playerId} className="tactile-card flex items-center gap-3 px-3 py-2.5">
-                <RankBadge rank={i + 1} />
-                <span className="flex-1">{e.name}</span>
-                <span className="font-semibold">{e.wins}</span>
-              </li>
+              <LeaderboardRow key={e.playerId} rank={i + 1} name={e.name} wins={e.wins} />
             ))}
           </ol>
         )}
       </div>
 
-      <HeadToHead />
+      <div className="tactile-card p-4">
+        <HeadToHead />
+      </div>
     </main>
-  );
-}
-
-function FilterChip({
-  href,
-  active,
-  children,
-}: {
-  href: string;
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      className="px-3 py-1.5 font-medium"
-      style={{
-        borderRadius: "var(--radius-button)",
-        border: active ? "3px solid #23222b" : "2px solid var(--border-subtle)",
-        boxShadow: "var(--shadow-raised)",
-        background: active ? "var(--accent-teal)" : "var(--card)",
-        color: active ? "#23222b" : "var(--foreground)",
-        opacity: active ? 1 : 0.75,
-      }}
-    >
-      {children}
-    </a>
   );
 }
 
@@ -102,11 +47,49 @@ const MEDAL_COLORS: Record<number, [string, string]> = {
   3: ["#e8b487", "#b1723c"],
 };
 
-function RankBadge({ rank }: { rank: number }) {
+const AVATAR_COLORS = ["var(--accent-coral)", "var(--accent-teal)", "var(--accent-mustard)", "var(--accent-sage)"];
+
+function avatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
+function LeaderboardRow({ rank, name, wins }: { rank: number; name: string; wins: number }) {
   const medal = MEDAL_COLORS[rank];
+  return (
+    <li
+      className="flex items-center gap-3 px-3 py-2.5"
+      style={{
+        background: "var(--card)",
+        color: "var(--card-foreground)",
+        borderRadius: "var(--radius-card)",
+        boxShadow: "var(--shadow-raised)",
+        border: medal ? `3px solid ${medal[1]}` : "var(--pixel-border)",
+      }}
+    >
+      <RankBadge rank={rank} medal={medal} />
+      <span
+        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+        style={{ background: avatarColor(name), color: "#23222b" }}
+      >
+        {name.slice(0, 1).toUpperCase()}
+      </span>
+      <span className="flex-1 truncate">{name}</span>
+      <span className="font-semibold text-right" style={{ minWidth: 32 }}>
+        {wins}
+      </span>
+      <span className="text-xs" style={{ color: "var(--muted)" }}>
+        wins
+      </span>
+    </li>
+  );
+}
+
+function RankBadge({ rank, medal }: { rank: number; medal?: [string, string] }) {
   if (!medal) {
     return (
-      <span className="w-7 text-center text-sm" style={{ color: "var(--muted)" }}>
+      <span className="w-6 text-center text-sm shrink-0" style={{ color: "var(--muted)" }}>
         {rank}
       </span>
     );
@@ -114,7 +97,7 @@ function RankBadge({ rank }: { rank: number }) {
   const [light, dark] = medal;
   return (
     <span
-      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
       style={{
         background: `linear-gradient(145deg, ${light}, ${dark})`,
         boxShadow: `var(--shadow-raised), inset 0 1px 1px rgba(255,255,255,0.5)`,
