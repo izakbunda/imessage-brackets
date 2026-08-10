@@ -2,7 +2,7 @@ imessage brackets
 
 - goal: allow users to have a bracket-style competition for imessage games (e.g. Game Pigeon). The app is a coordinator, not a game engine — it can't send/receive the actual game (no public iMessage API), so it manages rooms, brackets, notifications, and results.
 
-- design direction: iMessage-inspired visual style (chat-bubble elements, iOS-like UI/typography, blue/green accent language) rather than a generic neutral app look.
+- design direction: iMessage-inspired visual style (chat-bubble elements, iOS-like UI/typography, blue/green accent language) rather than a generic neutral app look. See "visual design (Step 7)" section below for the full spec.
 
 - flows:
     1. create "room"
@@ -98,6 +98,22 @@ imessage brackets
     - rooms/history persist after completion (no auto-expiry/cleanup in v1)
     - photo upload optional, stored in cloud storage (e.g. Supabase storage)
     - phone number doubles as a persistent cross-room player identity, powering a global leaderboard/stats page — this is new scope beyond a single bracket and needs its own data model (player profile keyed by phone number, aggregated stats), not just per-room match records
+
+- visual design (Step 7):
+    - overall style: skeuomorphic/tactile — raised buttons with press-down spring animations, layered shadows, subtle gradients suggesting physical material, inset/grooved form fields. Full app character, not just accents — tab bar, buttons, cards, forms, leaderboard all get the treatment.
+    - color: iOS-native blue (~#0A84FF) as primary accent, green (~#34C759) as secondary for confirmed/success states — mirrors iMessage's own blue/green bubble split.
+    - bracket match cards: stay rectangular (not literal chat-bubble shapes) but get depth — shadow, subtle gradient, slight 3D tilt on tap. Color-coded by viewer: on your own player page, your side renders in the blue accent, opponent stays neutral — reinforces "which one is me." Public spectator view (no "you") stays neutral for everyone.
+    - typography/shape: lean iOS-native — system-ui/SF Pro font stack (renders as actual San Francisco on iPhone, no font loading needed) with generous corner radius throughout, replacing the current Geist font.
+    - background: subtle depth/gradient behind cards (like iOS Settings' grouped background), not flat white/dark — makes raised elements actually read as raised.
+    - tab bar: icon + label per tab (Start/Join/Stats), raised/glossy bar, active tab gets a pressed-in glow.
+    - motion: subtle micro-interactions via Framer Motion — buttons press/spring on tap, bracket cards tilt slightly on interaction, bottom sheet (report/confirm) slides up with spring physics rather than appearing instantly. Respects `prefers-reduced-motion` — skip WebGL scene and springs in favor of instant/simple transitions when that OS setting is on.
+    - haptics: navigator.vibrate() on key taps (report, confirm, win) where supported. No sound effects for v1 (avoids unmuted-phone-in-public awkwardness).
+    - celebration moments (the one WebGL spot, via react-three-fiber + drei, isolated so it doesn't weigh down other pages):
+        - per-match win: a small celebration (e.g. confetti burst) plays whenever you win any match, not just the final — keeps momentum feeling good round to round.
+        - per-match loss/elimination: a smaller, muted counterpart — a wilting/deflating trophy (mirrors the winner's rising trophy) — plays for every elimination, any round, not just the final.
+        - tournament complete: champion gets the full moment — a 3D trophy (built from primitives, no asset pipeline) rising with a physics-based confetti burst. The runner-up (final loser specifically) gets the wilting-trophy counterpart at full scale to match. Everyone else just sees the plain "[winner] won the [game] bracket" text screen (they already got their elimination moment earlier in the bracket).
+    - also fixes: the dark-mode contrast bug noted during Step 4 verification (light text on white cards) — same styling pass, not worth a separate fix.
+    - new dependencies: framer-motion (spring/press micro-interactions), three + @react-three/fiber + @react-three/drei (celebration scenes only).
 
 - tech stack: Next.js + Supabase (Postgres, realtime, storage) + Vercel — same pattern as other projects (portfolio, RAG chatbot)
 
