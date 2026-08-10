@@ -58,7 +58,7 @@ export default async function RoomPlayerPage({
         )}
         <BracketCanvas
           code={code}
-          initialRoom={{ id: room.id, code: room.code, status: room.status, player_count: room.player_count }}
+          initialRoom={{ id: room.id, code: room.code, status: room.status, player_count: room.player_count, game: room.game }}
           initialRoomPlayers={safeRoomPlayers.map((p) => ({ id: p.id, name: p.name }))}
           initialMatches={matches ?? []}
           token={token}
@@ -96,6 +96,8 @@ export default async function RoomPlayerPage({
           isCreator={isCreator}
           playerToken={token}
         />
+      ) : room.status === "canceled" ? (
+        <p className="text-sm text-neutral-500">This room was canceled by the creator.</p>
       ) : (
         bracketSection
       )}

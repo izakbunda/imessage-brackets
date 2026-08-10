@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { savePushSubscription } from "@/app/room/[code]/push-actions";
+import { TactileButton } from "@/components/tactile-button";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -61,7 +62,7 @@ export function NotificationOptIn({ token }: { token: string }) {
   if (status === "checking" || status === "unsupported" || status === "on") return null;
 
   return (
-    <div className="border rounded-md p-3 flex flex-col gap-2 text-sm">
+    <div className="tactile-card p-3 flex flex-col gap-2 text-sm">
       {status === "denied" ? (
         <p className="text-neutral-500">
           Notifications are blocked for this app — enable them in your phone&apos;s settings to
@@ -70,13 +71,9 @@ export function NotificationOptIn({ token }: { token: string }) {
       ) : (
         <>
           <p>Turn on notifications to know when your match is live.</p>
-          <button
-            type="button"
-            onClick={enable}
-            className="bg-blue-500 text-white rounded-md px-3 py-1.5 font-medium self-start"
-          >
+          <TactileButton onClick={enable} className="self-start px-3 py-1.5">
             Enable notifications
-          </button>
+          </TactileButton>
         </>
       )}
       {error && <p className="text-red-600">{error}</p>}

@@ -26,7 +26,7 @@ export function PwaGate({ children }: { children: React.ReactNode }) {
 
   if (!standalone) {
     return (
-      <div className="border rounded-md p-4 flex flex-col gap-3">
+      <div className="tactile-card p-4 flex flex-col gap-3">
         <p className="font-medium">Add this app to your home screen to join</p>
         <p className="text-sm text-neutral-500">
           This app sends match notifications through your home screen icon —

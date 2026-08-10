@@ -1,5 +1,6 @@
 import { createRoom } from "./actions";
 import { GAMES } from "@/lib/games";
+import { TactileButton } from "@/components/tactile-button";
 
 const PLAYER_COUNT_OPTIONS = [2, 4, 8, 16, 32];
 
@@ -10,12 +11,7 @@ export default function CreateRoomPage() {
       <form action={createRoom} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Your name</span>
-          <input
-            name="name"
-            required
-            className="border rounded-md px-3 py-2"
-            placeholder="Izak"
-          />
+          <input name="name" required className="tactile-input px-3 py-2.5" placeholder="Izak" />
         </label>
 
         <label className="flex flex-col gap-1">
@@ -24,14 +20,14 @@ export default function CreateRoomPage() {
             name="phoneNumber"
             required
             type="tel"
-            className="border rounded-md px-3 py-2"
+            className="tactile-input px-3 py-2.5"
             placeholder="(555) 123-4567"
           />
         </label>
 
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Game</span>
-          <select name="game" required className="border rounded-md px-3 py-2">
+          <select name="game" required className="tactile-input px-3 py-2.5">
             {GAMES.map((game) => (
               <option key={game} value={game}>
                 {game}
@@ -42,12 +38,7 @@ export default function CreateRoomPage() {
 
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Number of players</span>
-          <select
-            name="playerCount"
-            required
-            defaultValue={4}
-            className="border rounded-md px-3 py-2"
-          >
+          <select name="playerCount" required defaultValue={4} className="tactile-input px-3 py-2.5">
             {PLAYER_COUNT_OPTIONS.map((count) => (
               <option key={count} value={count}>
                 {count}
@@ -68,12 +59,9 @@ export default function CreateRoomPage() {
           </label>
         </fieldset>
 
-        <button
-          type="submit"
-          className="mt-2 bg-blue-500 text-white rounded-md px-4 py-2 font-medium"
-        >
+        <TactileButton type="submit" className="mt-2">
           Create room
-        </button>
+        </TactileButton>
       </form>
     </main>
   );

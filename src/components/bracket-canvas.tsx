@@ -2,10 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { totalRounds } from "@/lib/bracket";
 import { computeBracketLayout, computeConnectors, NODE_WIDTH, NODE_HEIGHT } from "@/lib/bracket-layout";
 import { reportMatchResult, confirmMatchResult } from "@/app/room/[code]/match-actions";
+import { TactileButton } from "@/components/tactile-button";
+import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
+import { hapticSuccess, hapticTap } from "@/lib/haptics";
+import { MatchCelebration } from "@/components/match-celebration";
+import { TournamentCelebration } from "@/components/tournament-celebration";
+import { getPlayerBracketStatus } from "@/lib/player-status";
 
 type MatchData = {
   id: string;
@@ -21,7 +28,7 @@ type MatchData = {
 };
 
 type RoomPlayerData = { id: string; name: string };
-type RoomData = { id: string; code: string; status: string; player_count: number };
+type RoomData = { id: string; code: string; status: string; player_count: number; game: string };
 
 async function fetchBracketData(code: string) {
   const { data: room } = await supabase.from("rooms").select("*").eq("code", code).single();
@@ -68,6 +75,11 @@ export function BracketCanvas({
   const [roomPlayers, setRoomPlayers] = useState(initialRoomPlayers);
   const [matches, setMatches] = useState(initialMatches);
   const [openMatchId, setOpenMatchId] = useState<string | null>(null);
+  const [celebration, setCelebration] = useState<"win" | "loss" | null>(null);
+  const [tournamentCelebration, setTournamentCelebration] = useState<"champion" | "runnerup" | null>(
+    null
+  );
+  const reducedMotion = usePrefersReducedMotion();
 
   const refetch = useCallback(async () => {
     const data = await fetchBracketData(code);
@@ -94,8 +106,23 @@ export function BracketCanvas({
 
   const openMatch = matches.find((m) => m.id === openMatchId) ?? null;
 
+  useEffect(() => {
+    if (!viewerRoomPlayerId || room.status !== "complete") return;
+    const key = `celebrated:${room.id}:${viewerRoomPlayerId}`;
+    if (sessionStorage.getItem(key)) return;
+
+    const { champion, runnerUp } = getPlayerBracketStatus(matches, viewerRoomPlayerId, rounds);
+    if (champion || runnerUp) {
+      sessionStorage.setItem(key, "1");
+      setTournamentCelebration(champion ? "champion" : "runnerup");
+    }
+  }, [room.status, room.id, matches, viewerRoomPlayerId, rounds]);
+
   return (
-    <div className="relative border rounded-md overflow-hidden" style={{ height: "70vh" }}>
+    <div
+      className="relative overflow-hidden"
+      style={{ height: "70vh", borderRadius: "var(--radius-card)", boxShadow: "var(--shadow-raised)" }}
+    >
       <TransformWrapper minScale={0.4} maxScale={2} initialScale={0.8} centerOnInit>
         <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
           <div style={{ position: "relative", width, height, padding: 24 }}>
@@ -105,7 +132,14 @@ export function BracketCanvas({
               style={{ position: "absolute", top: 24, left: 24, pointerEvents: "none" }}
             >
               {connectors.map((c) => (
-                <path key={c.key} d={c.d} stroke="#cbd5e1" strokeWidth={2} fill="none" />
+                <path
+                  key={c.key}
+                  d={c.d}
+                  stroke="var(--border-subtle)"
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  fill="none"
+                />
               ))}
             </svg>
 
@@ -119,53 +153,99 @@ export function BracketCanvas({
                 isParticipant && !m.confirmed_at && !!m.room_player_1_id && !!m.room_player_2_id;
 
               return (
-                <button
+                <motion.button
                   key={m.id}
                   type="button"
-                  onClick={() => actionable && setOpenMatchId(m.id)}
+                  onClick={() => {
+                    if (actionable) {
+                      hapticTap();
+                      setOpenMatchId(m.id);
+                    }
+                  }}
                   disabled={!actionable}
+                  whileTap={
+                    actionable && !reducedMotion
+                      ? { scale: 0.95, rotateX: 4, rotateY: -4 }
+                      : undefined
+                  }
                   style={{
                     position: "absolute",
                     left: pos.x + 24,
                     top: pos.y + 24,
                     width: NODE_WIDTH,
                     height: NODE_HEIGHT,
+                    background: "var(--card)",
+                    borderRadius: "12px",
+                    boxShadow: actionable ? "var(--shadow-raised-lg)" : "var(--shadow-raised)",
+                    border: actionable
+                      ? "1.5px solid var(--accent-blue)"
+                      : "1px solid var(--border-subtle)",
+                    perspective: 400,
                   }}
-                  className={`rounded-md border bg-white text-left px-2 py-1 flex flex-col justify-center gap-0.5 text-sm ${
-                    actionable ? "border-blue-400 ring-1 ring-blue-200" : "border-neutral-200"
-                  }`}
+                  className="text-left px-2.5 py-1.5 flex flex-col justify-center gap-0.5 text-sm"
                 >
                   <MatchSlot
                     name={m.room_player_1_id ? nameById.get(m.room_player_1_id) ?? "…" : null}
                     score={m.player_1_score}
                     isWinner={!!m.confirmed_at && m.winner_room_player_id === m.room_player_1_id}
+                    isViewer={m.room_player_1_id === viewerRoomPlayerId}
                   />
                   <MatchSlot
                     name={m.room_player_2_id ? nameById.get(m.room_player_2_id) ?? "…" : null}
                     score={m.player_2_score}
                     isWinner={!!m.confirmed_at && m.winner_room_player_id === m.room_player_2_id}
+                    isViewer={m.room_player_2_id === viewerRoomPlayerId}
                   />
                   {!m.confirmed_at && m.reported_by_room_player_id && (
-                    <span className="text-[10px] text-amber-600">awaiting confirmation</span>
+                    <span className="text-[10px]" style={{ color: "#c77a1a" }}>
+                      awaiting confirmation
+                    </span>
                   )}
-                </button>
+                </motion.button>
               );
             })}
           </div>
         </TransformComponent>
       </TransformWrapper>
 
-      {openMatch && (
-        <MatchSheet
-          code={code}
-          token={token!}
-          match={openMatch}
-          player1Name={openMatch.room_player_1_id ? nameById.get(openMatch.room_player_1_id) ?? "Unknown" : ""}
-          player2Name={openMatch.room_player_2_id ? nameById.get(openMatch.room_player_2_id) ?? "Unknown" : ""}
-          viewerRoomPlayerId={viewerRoomPlayerId!}
-          onClose={() => setOpenMatchId(null)}
-        />
+      <AnimatePresence>
+        {openMatch && (
+          <MatchSheet
+            code={code}
+            token={token!}
+            match={openMatch}
+            player1Name={openMatch.room_player_1_id ? nameById.get(openMatch.room_player_1_id) ?? "Unknown" : ""}
+            player2Name={openMatch.room_player_2_id ? nameById.get(openMatch.room_player_2_id) ?? "Unknown" : ""}
+            viewerRoomPlayerId={viewerRoomPlayerId!}
+            onClose={() => setOpenMatchId(null)}
+            onResolved={(won) => setCelebration(won ? "win" : "loss")}
+          />
+        )}
+      </AnimatePresence>
+
+      {celebration && (
+        <MatchCelebration variant={celebration} onDone={() => setCelebration(null)} />
       )}
+
+      {tournamentCelebration &&
+        (() => {
+          const finalMatch = matches.find((m) => m.round_number === rounds);
+          const championName = finalMatch?.winner_room_player_id
+            ? nameById.get(finalMatch.winner_room_player_id) ?? "They"
+            : "They";
+          return (
+            <TournamentCelebration
+              variant={tournamentCelebration}
+              title={tournamentCelebration === "champion" ? "🏆 You won the bracket!" : "So close!"}
+              subtitle={
+                tournamentCelebration === "champion"
+                  ? `${room.game} — ${room.code}`
+                  : `${championName} won the ${room.game} bracket`
+              }
+              onDone={() => setTournamentCelebration(null)}
+            />
+          );
+        })()}
     </div>
   );
 }
@@ -174,14 +254,19 @@ function MatchSlot({
   name,
   score,
   isWinner,
+  isViewer,
 }: {
   name: string | null;
   score: number | null;
   isWinner: boolean;
+  isViewer: boolean;
 }) {
   return (
     <div className="flex justify-between">
-      <span className={`truncate ${isWinner ? "font-semibold" : ""} ${!name ? "text-neutral-400" : ""}`}>
+      <span
+        className={`truncate ${isWinner ? "font-semibold" : ""}`}
+        style={{ color: !name ? "var(--border-subtle)" : isViewer ? "var(--accent-blue)" : "inherit" }}
+      >
         {name ?? "TBD"}
       </span>
       {score !== null && <span className="text-neutral-500">{score}</span>}
@@ -197,6 +282,7 @@ function MatchSheet({
   player2Name,
   viewerRoomPlayerId,
   onClose,
+  onResolved,
 }: {
   code: string;
   token: string;
@@ -205,21 +291,27 @@ function MatchSheet({
   player2Name: string;
   viewerRoomPlayerId: string;
   onClose: () => void;
+  onResolved: (won: boolean) => void;
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedWinner, setSelectedWinner] = useState<string | null>(null);
   const [score1, setScore1] = useState("");
   const [score2, setScore2] = useState("");
+  const reducedMotion = usePrefersReducedMotion();
 
   const alreadyReported = !!match.reported_by_room_player_id;
   const reportedByMe = match.reported_by_room_player_id === viewerRoomPlayerId;
 
-  async function run(action: () => Promise<void>) {
+  async function run(action: () => Promise<void>, wonIfConfirming?: boolean) {
     setError(null);
     setPending(true);
     try {
       await action();
+      if (wonIfConfirming !== undefined) {
+        hapticSuccess();
+        onResolved(wonIfConfirming);
+      }
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
@@ -229,7 +321,19 @@ function MatchSheet({
   }
 
   return (
-    <div className="absolute inset-x-0 bottom-0 bg-white border-t rounded-t-xl p-4 shadow-lg flex flex-col gap-3">
+    <motion.div
+      initial={reducedMotion ? { opacity: 0 } : { y: "100%" }}
+      animate={reducedMotion ? { opacity: 1 } : { y: 0 }}
+      exit={reducedMotion ? { opacity: 0 } : { y: "100%" }}
+      transition={{ type: "spring", stiffness: 380, damping: 34 }}
+      className="absolute inset-x-0 bottom-0 p-4 flex flex-col gap-3"
+      style={{
+        background: "var(--card)",
+        borderTopLeftRadius: "var(--radius-card)",
+        borderTopRightRadius: "var(--radius-card)",
+        boxShadow: "var(--shadow-raised-lg)",
+      }}
+    >
       <div className="flex justify-between items-center">
         <p className="font-medium">
           {player1Name} vs {player2Name}
@@ -250,14 +354,17 @@ function MatchSheet({
             . Confirm?
           </p>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="button"
+          <TactileButton
             disabled={pending}
-            onClick={() => run(() => confirmMatchResult(code, token, match.id))}
-            className="bg-blue-500 text-white rounded-md px-4 py-2 font-medium disabled:opacity-50"
+            onClick={() =>
+              run(
+                () => confirmMatchResult(code, token, match.id),
+                match.winner_room_player_id === viewerRoomPlayerId
+              )
+            }
           >
             Confirm result
-          </button>
+          </TactileButton>
         </>
       )}
 
@@ -291,7 +398,7 @@ function MatchSheet({
               type="number"
               value={score1}
               onChange={(e) => setScore1(e.target.value)}
-              className="border rounded-md px-2 py-1 w-16"
+              className="tactile-input px-2 py-1 w-16"
               placeholder="0"
             />
             <span>-</span>
@@ -299,13 +406,12 @@ function MatchSheet({
               type="number"
               value={score2}
               onChange={(e) => setScore2(e.target.value)}
-              className="border rounded-md px-2 py-1 w-16"
+              className="tactile-input px-2 py-1 w-16"
               placeholder="0"
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="button"
+          <TactileButton
             disabled={pending || !selectedWinner}
             onClick={() =>
               run(() =>
@@ -319,12 +425,11 @@ function MatchSheet({
                 )
               )
             }
-            className="bg-blue-500 text-white rounded-md px-4 py-2 font-medium disabled:opacity-50"
           >
             Report result
-          </button>
+          </TactileButton>
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

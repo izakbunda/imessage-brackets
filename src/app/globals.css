@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f2f2f7;
+  --foreground: #1c1c1e;
+  --card: #ffffff;
+  --card-foreground: #1c1c1e;
+  --accent-blue: #0a84ff;
+  --accent-blue-pressed: #0870d6;
+  --accent-green: #34c759;
+  --accent-green-pressed: #29a548;
+  --border-subtle: rgba(60, 60, 67, 0.15);
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 10px rgba(0, 0, 0, 0.08);
+  --shadow-raised-lg: 0 2px 6px rgba(0, 0, 0, 0.08), 0 12px 24px rgba(0, 0, 0, 0.12);
+  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+  --radius-card: 16px;
+  --radius-button: 14px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-green: var(--accent-green);
+  --font-sans: var(--font-system);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #000000;
+    --foreground: #f2f2f7;
+    --card: #1c1c1e;
+    --card-foreground: #f2f2f7;
+    --accent-blue: #0a84ff;
+    --accent-blue-pressed: #3396ff;
+    --accent-green: #30d158;
+    --accent-green-pressed: #45db6b;
+    --border-subtle: rgba(84, 84, 88, 0.4);
+    --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.4);
+    --shadow-raised-lg: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 24px rgba(0, 0, 0, 0.5);
+    --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 }
 
 body {
-  background: var(--background);
+  background: radial-gradient(ellipse at top, color-mix(in srgb, var(--background) 96%, white), var(--background));
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+}
+
+.tactile-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-raised);
+  border: 1px solid var(--border-subtle);
+}
+
+.tactile-input {
+  background: var(--card);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-inset);
 }

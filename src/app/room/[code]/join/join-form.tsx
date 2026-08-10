@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { joinRoom, type JoinState } from "./actions";
 import { PwaGate } from "@/components/pwa-gate";
+import { TactileButton } from "@/components/tactile-button";
 
 const initialState: JoinState = {};
 
@@ -17,7 +18,7 @@ export function JoinForm({ code }: { code: string }) {
       <form action={formAction} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Your name</span>
-          <input name="name" required className="border rounded-md px-3 py-2" />
+          <input name="name" required className="tactile-input px-3 py-2.5" />
         </label>
 
         <label className="flex flex-col gap-1">
@@ -26,7 +27,7 @@ export function JoinForm({ code }: { code: string }) {
             name="phoneNumber"
             required
             type="tel"
-            className="border rounded-md px-3 py-2"
+            className="tactile-input px-3 py-2.5"
             placeholder="(555) 123-4567"
           />
         </label>
@@ -38,13 +39,9 @@ export function JoinForm({ code }: { code: string }) {
 
         {state.error && <p className="text-sm text-red-600">{state.error}</p>}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="mt-2 bg-blue-500 text-white rounded-md px-4 py-2 font-medium disabled:opacity-50"
-        >
+        <TactileButton type="submit" disabled={pending} className="mt-2">
           {pending ? "Joining…" : "Join room"}
-        </button>
+        </TactileButton>
       </form>
     </PwaGate>
   );

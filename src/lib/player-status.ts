@@ -31,6 +31,10 @@ export function getPlayerBracketStatus(
     !!lastConfirmed &&
     lastConfirmed.round_number === finalRound &&
     lastConfirmed.winner_room_player_id === viewerRoomPlayerId;
+  const runnerUp =
+    !!lastConfirmed &&
+    lastConfirmed.round_number === finalRound &&
+    lastConfirmed.winner_room_player_id !== viewerRoomPlayerId;
 
-  return { currentMatch, eliminated, champion };
+  return { currentMatch, eliminated, champion, runnerUp };
 }

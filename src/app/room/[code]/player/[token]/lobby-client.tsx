@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { cancelRoom, lockRoomAuto, lockRoomManual } from "../../actions";
+import { TactileButton } from "@/components/tactile-button";
 
 type RoomPlayerView = {
   id: string;
@@ -86,7 +88,7 @@ export function LobbyClient({
             {seedOrder.map((id, i) => {
               const p = roomPlayers.find((rp) => rp.id === id)!;
               return (
-                <li key={id} className="flex items-center gap-2 border rounded-md px-2 py-1">
+                <li key={id} className="tactile-card flex items-center gap-2 px-3 py-2">
                   <span className="w-6 text-sm text-neutral-500">{i + 1}</span>
                   <span className="flex-1">{p.name}</span>
                   <button
@@ -109,22 +111,26 @@ export function LobbyClient({
               );
             })}
           </ol>
-          <button
-            type="button"
+          <TactileButton
             onClick={() => runAction(() => lockRoomManual(room.code, playerToken, seedOrder))}
             disabled={pending}
-            className="bg-blue-500 text-white rounded-md px-4 py-2 font-medium disabled:opacity-50"
           >
             Generate bracket
-          </button>
+          </TactileButton>
         </div>
       ) : (
         <ul className="flex flex-col gap-1">
-          {roomPlayers.map((p) => (
-            <li key={p.id} className="border rounded-md px-3 py-2">
+          {roomPlayers.map((p, i) => (
+            <motion.li
+              key={p.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.03 }}
+              className="tactile-card px-3 py-2.5"
+            >
               {p.name}
               {p.seed_position !== null ? ` (seed ${p.seed_position + 1})` : ""}
-            </li>
+            </motion.li>
           ))}
         </ul>
       )}
@@ -133,34 +139,22 @@ export function LobbyClient({
 
       {room.status === "lobby" && isCreator && !showSeedingScreen && (
         <div className="flex gap-2">
-          <button
-            type="button"
+          <TactileButton
+            variant="secondary"
             onClick={() => runAction(() => cancelRoom(room.code, playerToken))}
             disabled={pending}
-            className="border rounded-md px-4 py-2 font-medium disabled:opacity-50"
           >
             Cancel room
-          </button>
+          </TactileButton>
           {room.seeding_mode === "auto" && (
-            <button
-              type="button"
+            <TactileButton
               onClick={() => runAction(() => lockRoomAuto(room.code, playerToken))}
               disabled={pending || !full}
-              className="bg-blue-500 text-white rounded-md px-4 py-2 font-medium disabled:opacity-50"
             >
               Lock &amp; generate bracket
-            </button>
+            </TactileButton>
           )}
         </div>
-      )}
-
-      {room.status === "locked" && (
-        <p className="text-sm text-green-700">
-          Bracket generated — full bracket view lands in the next step.
-        </p>
-      )}
-      {room.status === "canceled" && (
-        <p className="text-sm text-neutral-500">This room was canceled by the creator.</p>
       )}
     </div>
   );

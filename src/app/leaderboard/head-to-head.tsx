@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { getHeadToHead, type HeadToHeadResult } from "./head-to-head-actions";
+import { TactileButton } from "@/components/tactile-button";
 
 export function HeadToHead() {
   const [queryA, setQueryA] = useState("");
@@ -23,27 +24,22 @@ export function HeadToHead() {
           value={queryA}
           onChange={(e) => setQueryA(e.target.value)}
           placeholder="Player A — name or phone"
-          className="border rounded-md px-3 py-2"
+          className="tactile-input px-3 py-2.5"
         />
         <input
           value={queryB}
           onChange={(e) => setQueryB(e.target.value)}
           placeholder="Player B — name or phone"
-          className="border rounded-md px-3 py-2"
+          className="tactile-input px-3 py-2.5"
         />
-        <button
-          type="button"
-          onClick={submit}
-          disabled={pending || !queryA || !queryB}
-          className="bg-blue-500 text-white rounded-md px-4 py-2 font-medium disabled:opacity-50 self-start"
-        >
+        <TactileButton onClick={submit} disabled={pending || !queryA || !queryB} className="self-start">
           Compare
-        </button>
+        </TactileButton>
       </div>
 
       {result && "error" in result && <p className="text-sm text-red-600">{result.error}</p>}
       {result && !("error" in result) && (
-        <div className="border rounded-md p-3 text-sm">
+        <div className="tactile-card p-3 text-sm">
           {result.totalMatches === 0 ? (
             <p>
               {result.playerAName} and {result.playerBName} haven&apos;t played each other yet.
