@@ -64,11 +64,11 @@ export function TabBar() {
 
   return (
     <div
-      className="fixed inset-x-4 flex justify-center z-50 pointer-events-none"
-      style={{ bottom: "calc(10px + env(safe-area-inset-bottom))" }}
+      className="fixed inset-x-8 flex justify-center z-50 pointer-events-none"
+      style={{ bottom: "calc(24px + env(safe-area-inset-bottom))" }}
     >
       <nav
-        className="flex gap-1 px-1.5 py-1.5 w-full max-w-sm pointer-events-auto"
+        className="flex gap-1 px-1.5 py-2.5 w-full max-w-xs pointer-events-auto"
         style={{
           background: "var(--background-alt)",
           border: "3px solid var(--accent-teal)",
@@ -83,7 +83,7 @@ export function TabBar() {
               key={href}
               href={href}
               onClick={hapticTap}
-              className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 transition-transform active:scale-90"
+              className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 transition-transform active:scale-90"
               style={{
                 fontFamily: "var(--font-pixel-display), monospace",
                 fontSize: 8,

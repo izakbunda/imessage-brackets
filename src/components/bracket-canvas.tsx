@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { totalRounds } from "@/lib/bracket";
 import { computeBracketLayout, computeConnectors, NODE_WIDTH, NODE_HEIGHT } from "@/lib/bracket-layout";
-import { reportMatchResult, confirmMatchResult } from "@/app/room/[code]/match-actions";
+import { reportMatchResult, confirmMatchResult, getOpponentContact } from "@/app/room/[code]/match-actions";
 import { TactileButton } from "@/components/tactile-button";
 import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
 import { hapticSuccess, hapticTap } from "@/lib/haptics";
@@ -121,7 +121,13 @@ export function BracketCanvas({
   return (
     <div
       className="relative overflow-hidden"
-      style={{ height: "70vh", borderRadius: "var(--radius-card)", boxShadow: "var(--shadow-raised)" }}
+      style={{
+        height: "70vh",
+        background: "var(--card)",
+        border: "3px solid var(--accent-teal)",
+        borderRadius: "var(--radius-card)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+      }}
     >
       <TransformWrapper minScale={0.4} maxScale={2} initialScale={0.8} centerOnInit>
         <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
@@ -174,30 +180,37 @@ export function BracketCanvas({
                     top: pos.y + 24,
                     width: NODE_WIDTH,
                     height: NODE_HEIGHT,
-                    background: "var(--card)",
+                    background: "var(--background)",
                     borderRadius: "var(--radius-card)",
                     boxShadow: actionable ? "var(--shadow-raised-lg)" : "var(--shadow-raised)",
                     border: actionable
                       ? "3px solid var(--accent-coral)"
                       : "2px solid var(--border-subtle)",
                     perspective: 400,
+                    overflow: "hidden",
                   }}
-                  className="text-left px-2.5 py-1.5 flex flex-col justify-center gap-0.5 text-sm"
+                  className="text-left flex flex-col text-sm"
                 >
                   <MatchSlot
                     name={m.room_player_1_id ? nameById.get(m.room_player_1_id) ?? "…" : null}
                     score={m.player_1_score}
                     isWinner={!!m.confirmed_at && m.winner_room_player_id === m.room_player_1_id}
+                    isLoser={!!m.confirmed_at && m.winner_room_player_id === m.room_player_2_id}
                     isViewer={m.room_player_1_id === viewerRoomPlayerId}
                   />
+                  <div style={{ height: 1, background: "var(--border-subtle)" }} />
                   <MatchSlot
                     name={m.room_player_2_id ? nameById.get(m.room_player_2_id) ?? "…" : null}
                     score={m.player_2_score}
                     isWinner={!!m.confirmed_at && m.winner_room_player_id === m.room_player_2_id}
+                    isLoser={!!m.confirmed_at && m.winner_room_player_id === m.room_player_1_id}
                     isViewer={m.room_player_2_id === viewerRoomPlayerId}
                   />
                   {!m.confirmed_at && m.reported_by_room_player_id && (
-                    <span className="text-[10px]" style={{ color: "var(--accent-mustard)" }}>
+                    <span
+                      className="text-[9px] px-2 py-0.5 truncate"
+                      style={{ color: "#23222b", background: "var(--accent-mustard)" }}
+                    >
                       awaiting confirmation
                     </span>
                   )}
@@ -250,26 +263,52 @@ export function BracketCanvas({
   );
 }
 
+const AVATAR_COLORS = ["var(--accent-coral)", "var(--accent-teal)", "var(--accent-mustard)", "var(--accent-sage)"];
+
+function avatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
 function MatchSlot({
   name,
   score,
   isWinner,
+  isLoser,
   isViewer,
 }: {
   name: string | null;
   score: number | null;
   isWinner: boolean;
+  isLoser: boolean;
   isViewer: boolean;
 }) {
   return (
-    <div className="flex justify-between">
+    <div
+      className="flex-1 flex items-center gap-1.5 px-2"
+      style={{
+        background: isWinner ? "rgba(127, 165, 99, 0.18)" : "transparent",
+        opacity: isLoser ? 0.5 : 1,
+      }}
+    >
       <span
-        className={`truncate ${isWinner ? "font-semibold" : ""}`}
+        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+        style={{
+          background: name ? avatarColor(name) : "var(--border-subtle)",
+          color: "#23222b",
+        }}
+      >
+        {name ? name.slice(0, 1).toUpperCase() : "?"}
+      </span>
+      <span
+        className={`flex-1 truncate ${isWinner ? "font-semibold" : ""}`}
         style={{ color: !name ? "var(--border-subtle)" : isViewer ? "var(--accent-blue)" : "inherit" }}
       >
         {name ?? "TBD"}
       </span>
-      {score !== null && <span className="muted">{score}</span>}
+      {isWinner && <span style={{ color: "var(--accent-sage)" }}>▲</span>}
+      {score !== null && <span className="muted text-xs">{score}</span>}
     </div>
   );
 }
@@ -298,10 +337,21 @@ function MatchSheet({
   const [selectedWinner, setSelectedWinner] = useState<string | null>(null);
   const [score1, setScore1] = useState("");
   const [score2, setScore2] = useState("");
+  const [opponent, setOpponent] = useState<{ name: string; phone: string } | null>(null);
   const reducedMotion = usePrefersReducedMotion();
 
   const alreadyReported = !!match.reported_by_room_player_id;
   const reportedByMe = match.reported_by_room_player_id === viewerRoomPlayerId;
+
+  useEffect(() => {
+    let cancelled = false;
+    getOpponentContact(code, token, match.id).then((contact) => {
+      if (!cancelled) setOpponent(contact);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [code, token, match.id]);
 
   async function run(action: () => Promise<void>, wonIfConfirming?: boolean) {
     setError(null);
@@ -342,6 +392,19 @@ function MatchSheet({
           Close
         </button>
       </div>
+
+      {opponent && (
+        <a
+          href={`sms:${opponent.phone.replace(/[^\d+]/g, "")}`}
+          className="flex items-center gap-1.5 text-sm w-fit"
+          style={{ color: "var(--accent-teal)" }}
+        >
+          <span>💬</span>
+          <span>
+            iMessage {opponent.name} — {opponent.phone}
+          </span>
+        </a>
+      )}
 
       {alreadyReported && !reportedByMe && (
         <>

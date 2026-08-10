@@ -36,6 +36,22 @@ async function requireParticipant(code: string, token: string, matchId: string) 
   return { room, match, viewerRoomPlayerId: roomPlayer.id };
 }
 
+export async function getOpponentContact(code: string, token: string, matchId: string) {
+  const { match, viewerRoomPlayerId } = await requireParticipant(code, token, matchId);
+
+  const opponentRoomPlayerId =
+    match.room_player_1_id === viewerRoomPlayerId ? match.room_player_2_id! : match.room_player_1_id!;
+
+  const { data: opponent } = await supabaseAdmin
+    .from("room_players")
+    .select("players(name, phone_number)")
+    .eq("id", opponentRoomPlayerId)
+    .single();
+
+  if (!opponent?.players) return null;
+  return { name: opponent.players.name, phone: opponent.players.phone_number };
+}
+
 export async function reportMatchResult(
   code: string,
   token: string,

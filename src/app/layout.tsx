@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${pixelDisplay.variable} ${readableBody.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col pb-28">
+      <body className="min-h-full flex flex-col pb-32">
         <div className="scanlines" />
         <RegisterServiceWorker />
         {children}

@@ -58,7 +58,7 @@ export function ActiveGameChip() {
   return (
     <div
       className="fixed inset-x-4 z-40 flex justify-center pointer-events-none"
-      style={{ bottom: "calc(66px + env(safe-area-inset-bottom))" }}
+      style={{ bottom: "calc(80px + env(safe-area-inset-bottom))" }}
     >
       <Link
         href={`/room/${active.code}/player/${active.token}`}
