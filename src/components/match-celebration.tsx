@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
 
-const CONFETTI_COLORS = ["#0a84ff", "#34c759", "#ffd60a", "#ff9f0a", "#ff375f"];
+const CONFETTI_COLORS = ["#d9633b", "#4f9e94", "#d9a13e", "#7fa563", "#e8d9c4"];
 
 // Lightweight per-match moment (CSS/Framer only) — fires on every match win/
 // loss, so it has to stay cheap. The full WebGL trophy scene is reserved for

@@ -27,15 +27,15 @@ export default async function BracketPage({
   return (
     <main className="mx-auto max-w-2xl p-6">
       <h1 className="text-2xl font-semibold mb-1">{room.game}</h1>
-      <p className="text-neutral-500 mb-6">
+      <p className="muted mb-6">
         Room <span className="font-mono">{room.code}</span> — {room.status}
       </p>
 
       {room.status === "lobby" && (
-        <p className="text-sm text-neutral-500">Bracket hasn&apos;t been generated yet.</p>
+        <p className="text-sm muted">Bracket hasn&apos;t been generated yet.</p>
       )}
       {room.status === "canceled" && (
-        <p className="text-sm text-neutral-500">This room was canceled.</p>
+        <p className="text-sm muted">This room was canceled.</p>
       )}
       {(room.status === "locked" || room.status === "complete") && (
         <BracketCanvas

@@ -54,7 +54,7 @@ export default async function RoomPlayerPage({
       <div className="flex flex-col gap-3">
         {champion && <p className="font-medium">🏆 You won the bracket!</p>}
         {eliminated && (
-          <p className="text-sm text-neutral-500">You&apos;ve been eliminated. Thanks for playing!</p>
+          <p className="text-sm muted">You&apos;ve been eliminated. Thanks for playing!</p>
         )}
         <BracketCanvas
           code={code}
@@ -71,7 +71,7 @@ export default async function RoomPlayerPage({
   return (
     <main className="mx-auto max-w-md p-6">
       <h1 className="text-2xl font-semibold mb-1">{room.game}</h1>
-      <p className="text-neutral-500 mb-6">
+      <p className="muted mb-6">
         Room <span className="font-mono">{room.code}</span> — {room.status}
       </p>
       <p className="mb-4">
@@ -97,7 +97,7 @@ export default async function RoomPlayerPage({
           playerToken={token}
         />
       ) : room.status === "canceled" ? (
-        <p className="text-sm text-neutral-500">This room was canceled by the creator.</p>
+        <p className="text-sm muted">This room was canceled by the creator.</p>
       ) : (
         bracketSection
       )}

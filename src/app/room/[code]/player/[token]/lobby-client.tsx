@@ -77,7 +77,7 @@ export function LobbyClient({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm muted">
         {roomPlayers.length}/{room.player_count} players — {room.seeding_mode} seeding
       </p>
 
@@ -89,7 +89,7 @@ export function LobbyClient({
               const p = roomPlayers.find((rp) => rp.id === id)!;
               return (
                 <li key={id} className="tactile-card flex items-center gap-2 px-3 py-2">
-                  <span className="w-6 text-sm text-neutral-500">{i + 1}</span>
+                  <span className="w-6 text-sm muted">{i + 1}</span>
                   <span className="flex-1">{p.name}</span>
                   <button
                     type="button"
@@ -135,7 +135,7 @@ export function LobbyClient({
         </ul>
       )}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm error-text">{error}</p>}
 
       {room.status === "lobby" && isCreator && !showSeedingScreen && (
         <div className="flex gap-2">

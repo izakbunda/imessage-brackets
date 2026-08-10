@@ -48,7 +48,9 @@ export default async function LeaderboardPage({
         </div>
 
         {entries.length === 0 ? (
-          <p className="text-sm text-neutral-500">No confirmed matches yet for this filter.</p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            No confirmed matches yet for this filter.
+          </p>
         ) : (
           <ol className="flex flex-col gap-2">
             {entries.map((e, i) => (
@@ -79,12 +81,15 @@ function FilterChip({
   return (
     <a
       href={href}
-      className="px-3 py-1.5 rounded-full font-medium"
-      style={
-        active
-          ? { background: "var(--accent-blue)", color: "white", boxShadow: "var(--shadow-raised)" }
-          : { background: "var(--card)", color: "var(--foreground)", boxShadow: "var(--shadow-raised)", opacity: 0.7 }
-      }
+      className="px-3 py-1.5 font-medium"
+      style={{
+        borderRadius: "var(--radius-button)",
+        border: active ? "3px solid #23222b" : "2px solid var(--border-subtle)",
+        boxShadow: "var(--shadow-raised)",
+        background: active ? "var(--accent-teal)" : "var(--card)",
+        color: active ? "#23222b" : "var(--foreground)",
+        opacity: active ? 1 : 0.75,
+      }}
     >
       {children}
     </a>
@@ -100,7 +105,11 @@ const MEDAL_COLORS: Record<number, [string, string]> = {
 function RankBadge({ rank }: { rank: number }) {
   const medal = MEDAL_COLORS[rank];
   if (!medal) {
-    return <span className="w-7 text-center text-sm text-neutral-400">{rank}</span>;
+    return (
+      <span className="w-7 text-center text-sm" style={{ color: "var(--muted)" }}>
+        {rank}
+      </span>
+    );
   }
   const [light, dark] = medal;
   return (

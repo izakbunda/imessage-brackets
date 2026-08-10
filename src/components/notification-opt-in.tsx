@@ -64,7 +64,7 @@ export function NotificationOptIn({ token }: { token: string }) {
   return (
     <div className="tactile-card p-3 flex flex-col gap-2 text-sm">
       {status === "denied" ? (
-        <p className="text-neutral-500">
+        <p className="muted">
           Notifications are blocked for this app — enable them in your phone&apos;s settings to
           get match alerts.
         </p>
@@ -76,7 +76,7 @@ export function NotificationOptIn({ token }: { token: string }) {
           </TactileButton>
         </>
       )}
-      {error && <p className="text-red-600">{error}</p>}
+      {error && <p className="error-text">{error}</p>}
     </div>
   );
 }

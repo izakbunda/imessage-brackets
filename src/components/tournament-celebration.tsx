@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import * as THREE from "three";
 import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
 
-const CONFETTI_COLORS = ["#0a84ff", "#34c759", "#ffd60a", "#ff9f0a", "#ff375f"];
+const CONFETTI_COLORS = ["#d9633b", "#4f9e94", "#d9a13e", "#7fa563", "#e8d9c4"];
 
 function ease(t: number) {
   return 1 - Math.pow(1 - t, 3);
@@ -16,8 +16,8 @@ function Trophy({ variant }: { variant: "champion" | "runnerup" }) {
   const groupRef = useRef<THREE.Group>(null);
   const start = useRef<number | null>(null);
   const gold = variant === "champion";
-  const cupColor = gold ? "#ffd60a" : "#9a9aa0";
-  const baseColor = gold ? "#c77a1a" : "#6b6b70";
+  const cupColor = gold ? "#e0b84a" : "#8b8794";
+  const baseColor = gold ? "#b8791f" : "#5c5865";
 
   useFrame((state) => {
     if (!groupRef.current) return;

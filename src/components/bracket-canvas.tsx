@@ -175,11 +175,11 @@ export function BracketCanvas({
                     width: NODE_WIDTH,
                     height: NODE_HEIGHT,
                     background: "var(--card)",
-                    borderRadius: "12px",
+                    borderRadius: "var(--radius-card)",
                     boxShadow: actionable ? "var(--shadow-raised-lg)" : "var(--shadow-raised)",
                     border: actionable
-                      ? "1.5px solid var(--accent-blue)"
-                      : "1px solid var(--border-subtle)",
+                      ? "3px solid var(--accent-coral)"
+                      : "2px solid var(--border-subtle)",
                     perspective: 400,
                   }}
                   className="text-left px-2.5 py-1.5 flex flex-col justify-center gap-0.5 text-sm"
@@ -197,7 +197,7 @@ export function BracketCanvas({
                     isViewer={m.room_player_2_id === viewerRoomPlayerId}
                   />
                   {!m.confirmed_at && m.reported_by_room_player_id && (
-                    <span className="text-[10px]" style={{ color: "#c77a1a" }}>
+                    <span className="text-[10px]" style={{ color: "var(--accent-mustard)" }}>
                       awaiting confirmation
                     </span>
                   )}
@@ -269,7 +269,7 @@ function MatchSlot({
       >
         {name ?? "TBD"}
       </span>
-      {score !== null && <span className="text-neutral-500">{score}</span>}
+      {score !== null && <span className="muted">{score}</span>}
     </div>
   );
 }
@@ -338,7 +338,7 @@ function MatchSheet({
         <p className="font-medium">
           {player1Name} vs {player2Name}
         </p>
-        <button type="button" onClick={onClose} className="text-neutral-400 text-sm">
+        <button type="button" onClick={onClose} className="muted text-sm">
           Close
         </button>
       </div>
@@ -353,7 +353,7 @@ function MatchSheet({
               : ""}
             . Confirm?
           </p>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm error-text">{error}</p>}
           <TactileButton
             disabled={pending}
             onClick={() =>
@@ -369,7 +369,7 @@ function MatchSheet({
       )}
 
       {alreadyReported && reportedByMe && (
-        <p className="text-sm text-neutral-500">Waiting for your opponent to confirm.</p>
+        <p className="text-sm muted">Waiting for your opponent to confirm.</p>
       )}
 
       {!alreadyReported && (
@@ -410,7 +410,7 @@ function MatchSheet({
               placeholder="0"
             />
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm error-text">{error}</p>}
           <TactileButton
             disabled={pending || !selectedWinner}
             onClick={() =>

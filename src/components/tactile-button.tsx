@@ -7,16 +7,22 @@ import { hapticTap } from "@/lib/haptics";
 
 type Variant = "primary" | "secondary" | "success";
 
-const VARIANT_STYLES: Record<Variant, string> = {
-  primary: "text-white",
-  secondary: "tactile-card",
-  success: "text-white",
+const VARIANT_BG: Record<Variant, string> = {
+  primary: "var(--accent-coral)",
+  secondary: "var(--card)",
+  success: "var(--accent-sage)",
 };
 
-const VARIANT_BG: Record<Variant, string> = {
-  primary: "var(--accent-blue)",
-  secondary: "var(--card)",
-  success: "var(--accent-green)",
+const VARIANT_TEXT: Record<Variant, string> = {
+  primary: "#23222b",
+  secondary: "var(--foreground)",
+  success: "#23222b",
+};
+
+const VARIANT_BORDER: Record<Variant, string> = {
+  primary: "3px solid #23222b",
+  secondary: "var(--pixel-border)",
+  success: "3px solid #23222b",
 };
 
 type TactileButtonProps = {
@@ -39,19 +45,24 @@ export const TactileButton = forwardRef<HTMLButtonElement, TactileButtonProps>(f
   return (
     <motion.button
       ref={ref}
-      whileTap={reducedMotion ? undefined : { scale: 0.96, y: 1 }}
-      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      whileTap={reducedMotion ? undefined : { x: 3, y: 3, boxShadow: "0 0 0 0 rgba(0,0,0,0.6)" }}
+      transition={{ type: "spring", stiffness: 700, damping: 30 }}
       onClick={(e) => {
         hapticTap();
         onClick?.(e);
       }}
       style={{
         background: VARIANT_BG[variant],
+        color: VARIANT_TEXT[variant],
+        border: VARIANT_BORDER[variant],
         borderRadius: "var(--radius-button)",
-        boxShadow: variant === "secondary" ? "var(--shadow-raised)" : "var(--shadow-raised)",
+        boxShadow: "var(--shadow-raised)",
+        fontFamily: "var(--font-pixel-display), monospace",
+        fontSize: 12,
+        textTransform: "uppercase",
         ...style,
       }}
-      className={`px-4 py-2.5 font-medium disabled:opacity-50 ${VARIANT_STYLES[variant]} ${className}`}
+      className={`px-4 py-3 disabled:opacity-50 ${className}`}
       {...props}
     >
       {children}

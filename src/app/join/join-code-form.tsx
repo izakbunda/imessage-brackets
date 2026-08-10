@@ -19,7 +19,7 @@ export function JoinCodeForm() {
         autoCapitalize="off"
         autoCorrect="off"
       />
-      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state.error && <p className="text-sm error-text">{state.error}</p>}
       <TactileButton type="submit" disabled={pending}>
         {pending ? "Looking up…" : "Join room"}
       </TactileButton>

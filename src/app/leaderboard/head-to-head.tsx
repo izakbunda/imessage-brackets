@@ -37,7 +37,7 @@ export function HeadToHead() {
         </TactileButton>
       </div>
 
-      {result && "error" in result && <p className="text-sm text-red-600">{result.error}</p>}
+      {result && "error" in result && <p className="text-sm error-text">{result.error}</p>}
       {result && !("error" in result) && (
         <div className="tactile-card p-3 text-sm">
           {result.totalMatches === 0 ? (
@@ -48,7 +48,7 @@ export function HeadToHead() {
             <p>
               <strong>{result.playerAName}</strong> {result.aWins} — {result.bWins}{" "}
               <strong>{result.playerBName}</strong>{" "}
-              <span className="text-neutral-500">({result.totalMatches} matches)</span>
+              <span className="muted">({result.totalMatches} matches)</span>
             </p>
           )}
         </div>

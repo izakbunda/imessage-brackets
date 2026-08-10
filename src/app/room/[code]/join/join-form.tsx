@@ -37,7 +37,7 @@ export function JoinForm({ code }: { code: string }) {
           <input name="photo" type="file" accept="image/*" className="text-sm" />
         </label>
 
-        {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+        {state.error && <p className="text-sm error-text">{state.error}</p>}
 
         <TactileButton type="submit" disabled={pending} className="mt-2">
           {pending ? "Joining…" : "Join room"}

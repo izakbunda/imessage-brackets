@@ -28,11 +28,11 @@ export function PwaGate({ children }: { children: React.ReactNode }) {
     return (
       <div className="tactile-card p-4 flex flex-col gap-3">
         <p className="font-medium">Add this app to your home screen to join</p>
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm muted">
           This app sends match notifications through your home screen icon —
           it can&apos;t join a room from inside a regular browser tab.
         </p>
-        <ol className="text-sm text-neutral-500 list-decimal list-inside flex flex-col gap-1">
+        <ol className="text-sm muted list-decimal list-inside flex flex-col gap-1">
           <li>Tap the Share icon in Safari</li>
           <li>Tap &quot;Add to Home Screen&quot;</li>
           <li>Open the app from the new icon on your home screen</li>
