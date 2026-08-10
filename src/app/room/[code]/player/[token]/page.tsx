@@ -93,6 +93,7 @@ export default async function RoomPlayerPage({
             status: room.status,
             seeding_mode: room.seeding_mode,
             player_count: room.player_count,
+            game: room.game,
           }}
           roomPlayers={safeRoomPlayers}
           isCreator={isCreator}

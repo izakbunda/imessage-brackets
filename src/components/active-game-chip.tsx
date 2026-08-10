@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getStoredRooms, removeStoredRoom, type StoredRoom } from "@/lib/active-rooms";
+import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
 
 export function ActiveGameChip() {
   const pathname = usePathname();
   const [active, setActive] = useState<StoredRoom | null>(null);
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     let cancelled = false;
@@ -56,26 +59,50 @@ export function ActiveGameChip() {
   if (pathname === `/room/${active.code}/player/${active.token}`) return null;
 
   return (
-    <div
-      className="fixed inset-x-4 z-40 flex justify-center pointer-events-none"
-      style={{ bottom: "calc(80px + env(safe-area-inset-bottom))" }}
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="fixed inset-x-8 z-40 flex justify-center pointer-events-none"
+      style={{ bottom: "calc(92px + env(safe-area-inset-bottom))" }}
     >
-      <Link
-        href={`/room/${active.code}/player/${active.token}`}
-        className="pointer-events-auto flex items-center gap-2 px-4 py-2 w-full max-w-sm"
-        style={{
-          background: "var(--accent-coral)",
-          color: "#23222b",
-          border: "3px solid #23222b",
-          borderRadius: 999,
-          boxShadow: "var(--shadow-raised)",
-          fontFamily: "var(--font-pixel-display), monospace",
-          fontSize: 10,
-        }}
+      <motion.div
+        animate={
+          reducedMotion
+            ? undefined
+            : {
+                scale: [1, 1.03, 1],
+                boxShadow: [
+                  "var(--shadow-raised-lg)",
+                  "0 0 0 8px rgba(217,99,59,0.25)",
+                  "var(--shadow-raised-lg)",
+                ],
+              }
+        }
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        className="pointer-events-auto w-full max-w-xs"
+        style={{ borderRadius: 999 }}
       >
-        <span>▶</span>
-        <span className="truncate">Back to your {active.game} game</span>
-      </Link>
-    </div>
+        <Link
+          href={`/room/${active.code}/player/${active.token}`}
+          className="flex items-center justify-center gap-2 px-4 py-3"
+          style={{
+            background: "var(--accent-coral)",
+            color: "#23222b",
+            border: "3px solid #23222b",
+            borderRadius: 999,
+            fontFamily: "var(--font-pixel-display), monospace",
+            fontSize: 10,
+          }}
+        >
+          <motion.span
+            animate={reducedMotion ? undefined : { x: [0, 3, 0] }}
+            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+          >
+            ▶
+          </motion.span>
+          <span className="truncate">Back to your {active.game} game</span>
+        </Link>
+      </motion.div>
+    </motion.div>
   );
 }

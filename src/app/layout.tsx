@@ -4,6 +4,8 @@ import "./globals.css";
 import { RegisterServiceWorker } from "./register-sw";
 import { TabBar } from "@/components/tab-bar";
 import { ActiveGameChip } from "@/components/active-game-chip";
+import { PageTransition } from "@/components/page-transition";
+import { AppGate } from "@/components/app-gate";
 
 const pixelDisplay = Press_Start_2P({
   weight: "400",
@@ -28,9 +30,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col pb-32">
         <div className="scanlines" />
         <RegisterServiceWorker />
-        {children}
-        <ActiveGameChip />
-        <TabBar />
+        <AppGate>
+          <PageTransition>{children}</PageTransition>
+          <ActiveGameChip />
+          <TabBar />
+        </AppGate>
       </body>
     </html>
   );

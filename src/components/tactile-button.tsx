@@ -45,6 +45,7 @@ export const TactileButton = forwardRef<HTMLButtonElement, TactileButtonProps>(f
   return (
     <motion.button
       ref={ref}
+      whileHover={reducedMotion ? undefined : { y: -2, boxShadow: "var(--shadow-raised-lg)" }}
       whileTap={reducedMotion ? undefined : { x: 3, y: 3, boxShadow: "0 0 0 0 rgba(0,0,0,0.6)" }}
       transition={{ type: "spring", stiffness: 700, damping: 30 }}
       onClick={(e) => {

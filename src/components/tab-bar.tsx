@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { hapticTap } from "@/lib/haptics";
+import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
 
 const PX = 2;
 
@@ -61,6 +63,7 @@ const TABS = [
 
 export function TabBar() {
   const pathname = usePathname();
+  const reducedMotion = usePrefersReducedMotion();
 
   return (
     <div
@@ -83,17 +86,35 @@ export function TabBar() {
               key={href}
               href={href}
               onClick={hapticTap}
-              className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 transition-transform active:scale-90"
+              className="relative flex-1 flex items-center justify-center gap-1.5 px-2 py-2 transition-transform active:scale-90"
               style={{
                 fontFamily: "var(--font-pixel-display), monospace",
                 fontSize: 8,
                 color: active ? "#23222b" : "var(--muted)",
-                background: active ? color : "transparent",
-                borderRadius: 999,
               }}
             >
-              <PixelIcon grid={grid} color={active ? "#23222b" : "var(--muted)"} />
-              {label}
+              {active && (
+                <motion.span
+                  layoutId="tab-pill"
+                  transition={
+                    reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 32 }
+                  }
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: color,
+                    borderRadius: 999,
+                  }}
+                />
+              )}
+              <motion.span
+                animate={active && !reducedMotion ? { y: [0, -3, 0] } : { y: 0 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="relative flex items-center gap-1.5"
+              >
+                <PixelIcon grid={grid} color={active ? "#23222b" : "var(--muted)"} />
+                {label}
+              </motion.span>
             </Link>
           );
         })}

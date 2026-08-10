@@ -21,6 +21,7 @@ type RoomView = {
   status: string;
   seeding_mode: "auto" | "manual";
   player_count: number;
+  game: string;
 };
 
 export function LobbyClient({
@@ -75,11 +76,22 @@ export function LobbyClient({
     });
   }
 
+  function invitePlayers() {
+    const url = `${window.location.origin}/room/${room.code}/join`;
+    window.location.href = `sms:&body=${encodeURIComponent(`Join my ${room.game} bracket! ${url}`)}`;
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm muted">
         {roomPlayers.length}/{room.player_count} players — {room.seeding_mode} seeding
       </p>
+
+      {isCreator && room.status === "lobby" && !full && (
+        <TactileButton variant="secondary" onClick={invitePlayers}>
+          💬 Invite players
+        </TactileButton>
+      )}
 
       {showSeedingScreen ? (
         <div className="flex flex-col gap-2">

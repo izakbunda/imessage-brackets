@@ -1,64 +1,109 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import * as THREE from "three";
 import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
 
 const CONFETTI_COLORS = ["#d9633b", "#4f9e94", "#d9a13e", "#7fa563", "#e8d9c4"];
 
-function ease(t: number) {
-  return 1 - Math.pow(1 - t, 3);
-}
+const PX = 8;
 
-function Trophy({ variant }: { variant: "champion" | "runnerup" }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const start = useRef<number | null>(null);
+// 15x16 pixel-art trophy: R = cup rim/body, H = handle, S = stem, B = base.
+const TROPHY_GRID = [
+  "...RRRRRRRRR...",
+  "..RRRRRRRRRRR..",
+  ".RRRRRRRRRRRRR.",
+  "HRRRRRRRRRRRRRH",
+  "HRRRRRRRRRRRRRH",
+  ".HRRRRRRRRRRRH.",
+  "..RRRRRRRRRRR..",
+  "...RRRRRRRRR...",
+  ".....RRRRR.....",
+  "......SSS......",
+  "......SSS......",
+  ".....BBBBB.....",
+  "....BBBBBBB....",
+  "....BBBBBBB....",
+  "...BBBBBBBBB...",
+  "...BBBBBBBBB...",
+];
+
+function PixelTrophy({ variant }: { variant: "champion" | "runnerup" }) {
   const gold = variant === "champion";
-  const cupColor = gold ? "#e0b84a" : "#8b8794";
-  const baseColor = gold ? "#b8791f" : "#5c5865";
-
-  useFrame((state) => {
-    if (!groupRef.current) return;
-    if (start.current === null) start.current = state.clock.elapsedTime;
-    const t = Math.min((state.clock.elapsedTime - start.current) / 1.4, 1);
-    const e = ease(t);
-
-    if (gold) {
-      groupRef.current.position.y = THREE.MathUtils.lerp(-1.2, 0, e) + Math.sin(state.clock.elapsedTime * 2) * 0.04;
-      groupRef.current.rotation.y += 0.008;
-    } else {
-      groupRef.current.rotation.z = THREE.MathUtils.lerp(0, Math.PI / 2.3, e);
-      groupRef.current.position.y = THREE.MathUtils.lerp(0.2, -0.5, e);
-    }
-  });
+  const colors: Record<string, string> = gold
+    ? { R: "#e0b84a", H: "#b8791f", S: "#b8791f", B: "#8a5a16" }
+    : { R: "#8b8794", H: "#5c5865", S: "#5c5865", B: "#46424f" };
+  const highlightRows = new Set([0, 1]);
 
   return (
-    <group ref={groupRef}>
-      <mesh position={[0, 0.6, 0]}>
-        <cylinderGeometry args={[0.5, 0.25, 0.7, 24]} />
-        <meshStandardMaterial color={cupColor} metalness={0.6} roughness={0.25} />
-      </mesh>
-      <mesh position={[0, 0.1, 0]}>
-        <cylinderGeometry args={[0.08, 0.08, 0.5, 12]} />
-        <meshStandardMaterial color={cupColor} metalness={0.6} roughness={0.25} />
-      </mesh>
-      <mesh position={[0, -0.25, 0]}>
-        <cylinderGeometry args={[0.4, 0.45, 0.2, 24]} />
-        <meshStandardMaterial color={baseColor} metalness={0.4} roughness={0.4} />
-      </mesh>
-    </group>
+    <svg
+      width={TROPHY_GRID[0].length * PX}
+      height={TROPHY_GRID.length * PX}
+      viewBox={`0 0 ${TROPHY_GRID[0].length * PX} ${TROPHY_GRID.length * PX}`}
+      style={{ imageRendering: "pixelated" }}
+    >
+      {TROPHY_GRID.map((row, y) =>
+        [...row].map((cell, x) => {
+          if (cell === ".") return null;
+          const fill = highlightRows.has(y) && cell === "R" ? lighten(colors.R) : colors[cell];
+          return (
+            <rect key={`${x}-${y}`} x={x * PX} y={y * PX} width={PX} height={PX} fill={fill} />
+          );
+        })
+      )}
+    </svg>
+  );
+}
+
+function lighten(hex: string) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, ((n >> 16) & 255) + 45);
+  const g = Math.min(255, ((n >> 8) & 255) + 45);
+  const b = Math.min(255, (n & 255) + 45);
+  return `rgb(${r},${g},${b})`;
+}
+
+function Sparkles({ color }: { color: string }) {
+  const [sparkles] = useState(() =>
+    Array.from({ length: 10 }).map(() => ({
+      angle: Math.random() * Math.PI * 2,
+      distance: 90 + Math.random() * 70,
+      delay: Math.random() * 1.2,
+      size: 4 + Math.random() * 5,
+    }))
+  );
+
+  return (
+    <>
+      {sparkles.map((s, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
+          transition={{ duration: 1.1, repeat: Infinity, delay: s.delay, repeatDelay: 0.8 }}
+          style={{
+            position: "absolute",
+            left: `calc(50% + ${Math.cos(s.angle) * s.distance}px)`,
+            top: `calc(50% + ${Math.sin(s.angle) * s.distance}px)`,
+            width: s.size,
+            height: s.size,
+            background: color,
+            clipPath:
+              "polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%)",
+          }}
+        />
+      ))}
+    </>
   );
 }
 
 function ConfettiOverlay() {
   const [pieces] = useState(() =>
-    Array.from({ length: 40 }).map(() => ({
+    Array.from({ length: 70 }).map(() => ({
       left: Math.random() * 100,
       delay: Math.random() * 0.6,
-      duration: 1.8 + Math.random() * 1.2,
-      rotate: Math.random() * 400 - 200,
+      duration: 1.6 + Math.random() * 1.4,
+      rotate: Math.random() * 500 - 250,
     }))
   );
 
@@ -75,7 +120,6 @@ function ConfettiOverlay() {
             top: 0,
             width: 8,
             height: 12,
-            borderRadius: 2,
             background: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
           }}
         />
@@ -97,9 +141,11 @@ export function TournamentCelebration({
 }) {
   const reducedMotion = usePrefersReducedMotion();
   const [dismissing, setDismissing] = useState(false);
+  const gold = variant === "champion";
+  const glowColor = gold ? "#e0b84a" : "#8b8794";
 
   useEffect(() => {
-    const t = setTimeout(() => setDismissing(true), 4200);
+    const t = setTimeout(() => setDismissing(true), 4600);
     return () => clearTimeout(t);
   }, []);
 
@@ -115,29 +161,81 @@ export function TournamentCelebration({
       animate={{ opacity: dismissing ? 0 : 1 }}
       transition={{ duration: 0.3 }}
       onClick={() => setDismissing(true)}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4"
-      style={{ background: "rgba(0,0,0,0.55)" }}
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 overflow-hidden"
+      style={{ background: "#0d0c12" }}
     >
-      {variant === "champion" && !reducedMotion && <ConfettiOverlay />}
+      {!reducedMotion && (
+        <motion.div
+          className="absolute inset-0"
+          style={{
+            background: `conic-gradient(from 0deg, ${glowColor}33, transparent 25%, ${glowColor}33 50%, transparent 75%, ${glowColor}33)`,
+          }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+        />
+      )}
 
-      <div style={{ width: 220, height: 220 }}>
-        {!reducedMotion ? (
-          <Canvas camera={{ position: [0, 0.3, 3], fov: 40 }}>
-            <ambientLight intensity={0.7} />
-            <directionalLight position={[2, 3, 2]} intensity={1.2} />
-            <Trophy variant={variant} />
-          </Canvas>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl">
-            {variant === "champion" ? "🏆" : "🥈"}
-          </div>
-        )}
-      </div>
+      {!reducedMotion && (
+        <motion.div
+          className="absolute inset-0"
+          style={{ background: "#fff" }}
+          initial={{ opacity: 0.9 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+        />
+      )}
 
-      <div className="text-center text-white px-6">
-        <p className="text-2xl font-semibold">{title}</p>
-        <p className="text-sm opacity-80 mt-1">{subtitle}</p>
-      </div>
+      {gold && !reducedMotion && <ConfettiOverlay />}
+
+      <motion.div
+        className="relative flex items-center justify-center"
+        style={{ width: 240, height: 260 }}
+        initial={reducedMotion ? { opacity: 0 } : { scale: 0, rotate: -20 }}
+        animate={
+          reducedMotion
+            ? { opacity: 1 }
+            : gold
+              ? { scale: [0, 1.25, 1], rotate: [-20, 8, 0] }
+              : { scale: 1, rotate: 70, y: 40, opacity: 0.7 }
+        }
+        transition={
+          gold
+            ? { duration: 0.7, times: [0, 0.6, 1], ease: "easeOut" }
+            : { duration: 0.9, ease: "easeIn" }
+        }
+      >
+        {gold && !reducedMotion && <Sparkles color={glowColor} />}
+        <motion.div
+          animate={
+            !reducedMotion && gold
+              ? { y: [0, -10, 0], filter: [
+                  `drop-shadow(0 0 8px ${glowColor}88)`,
+                  `drop-shadow(0 0 26px ${glowColor}cc)`,
+                  `drop-shadow(0 0 8px ${glowColor}88)`,
+                ] }
+              : undefined
+          }
+          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <PixelTrophy variant={variant} />
+        </motion.div>
+      </motion.div>
+
+      <motion.div
+        className="text-center px-6 relative"
+        style={{ color: "#f2ede3" }}
+        initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.4 }}
+      >
+        <p
+          className="text-xl mb-1"
+          style={{ fontFamily: "var(--font-pixel-display), monospace", letterSpacing: 1 }}
+        >
+          {title}
+        </p>
+        <p className="text-sm opacity-80">{subtitle}</p>
+      </motion.div>
     </motion.div>
   );
 }
