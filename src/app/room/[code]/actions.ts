@@ -3,6 +3,7 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { generateBracketSkeleton } from "@/lib/bracket";
 import { broadcastRoomChanged } from "@/lib/realtime";
+import { sendPushToPlayer, getRoomPlayerDetails } from "@/lib/push";
 
 async function requireCreator(code: string, token: string) {
   const { data: room } = await supabaseAdmin
@@ -78,7 +79,7 @@ function assertLockable(
 }
 
 async function generateAndLock(
-  room: { id: string },
+  room: { id: string; code: string; game: string },
   orderedRoomPlayerIds: string[]
 ) {
   const skeleton = generateBracketSkeleton(orderedRoomPlayerIds);
@@ -107,4 +108,28 @@ async function generateAndLock(
   if (roomError) throw roomError;
 
   await broadcastRoomChanged(room.id);
+
+  // round 1 matches have both slots filled immediately — notify those players
+  const round1 = skeleton.filter((m) => m.roundNumber === 1);
+  await Promise.all(
+    round1.map(async (m) => {
+      const [p1, p2] = await Promise.all([
+        getRoomPlayerDetails(m.roomPlayer1Id!),
+        getRoomPlayerDetails(m.roomPlayer2Id!),
+      ]);
+      if (!p1 || !p2) return;
+      await Promise.all([
+        sendPushToPlayer(p1.playerId, {
+          title: "Your match is live",
+          body: `${p2.name} — ${room.game} — Round 1`,
+          url: `/room/${room.code}/player/${p1.token}`,
+        }),
+        sendPushToPlayer(p2.playerId, {
+          title: "Your match is live",
+          body: `${p1.name} — ${room.game} — Round 1`,
+          url: `/room/${room.code}/player/${p2.token}`,
+        }),
+      ]);
+    })
+  );
 }

@@ -3,6 +3,7 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { nextSlot } from "@/lib/bracket";
 import { broadcastRoomChanged } from "@/lib/realtime";
+import { sendPushToPlayer, getRoomPlayerDetails } from "@/lib/push";
 
 async function requireParticipant(code: string, token: string, matchId: string) {
   const { data: room } = await supabaseAdmin.from("rooms").select("*").eq("code", code).single();
@@ -62,6 +63,21 @@ export async function reportMatchResult(
   if (error) throw error;
 
   await broadcastRoomChanged(room.id);
+
+  const otherRoomPlayerId =
+    match.room_player_1_id === viewerRoomPlayerId ? match.room_player_2_id! : match.room_player_1_id!;
+  const [reporter, other] = await Promise.all([
+    getRoomPlayerDetails(viewerRoomPlayerId),
+    getRoomPlayerDetails(otherRoomPlayerId),
+  ]);
+  if (reporter && other) {
+    const scoreText = score1 !== null && score2 !== null ? ` ${score1}-${score2}` : "";
+    await sendPushToPlayer(other.playerId, {
+      title: `${reporter.name} reported a result`,
+      body: `They say they won${scoreText} — confirm?`,
+      url: `/room/${code}/player/${other.token}`,
+    });
+  }
 }
 
 export async function confirmMatchResult(code: string, token: string, matchId: string) {
@@ -83,7 +99,7 @@ export async function confirmMatchResult(code: string, token: string, matchId: s
   const { nextSlotInRound, isPlayer1 } = nextSlot(match.slot_in_round);
   const { data: nextMatch } = await supabaseAdmin
     .from("matches")
-    .select("id")
+    .select("*")
     .eq("room_id", room.id)
     .eq("round_number", match.round_number + 1)
     .eq("slot_in_round", nextSlotInRound)
@@ -108,4 +124,76 @@ export async function confirmMatchResult(code: string, token: string, matchId: s
   }
 
   await broadcastRoomChanged(room.id);
+
+  // notify both participants of this match: winner moves on, loser is out
+  const [winnerDetails, loserDetails] = await Promise.all([
+    getRoomPlayerDetails(match.winner_room_player_id),
+    getRoomPlayerDetails(
+      match.winner_room_player_id === match.room_player_1_id
+        ? match.room_player_2_id!
+        : match.room_player_1_id!
+    ),
+  ]);
+  if (winnerDetails && loserDetails) {
+    await Promise.all([
+      sendPushToPlayer(winnerDetails.playerId, {
+        title: "You're moving on!",
+        body: `You beat ${loserDetails.name} — next round coming up`,
+        url: `/room/${code}/player/${winnerDetails.token}`,
+      }),
+      sendPushToPlayer(loserDetails.playerId, {
+        title: "Match over",
+        body: `${winnerDetails.name} won — you're out of the bracket`,
+        url: `/room/${code}/player/${loserDetails.token}`,
+      }),
+    ]);
+  }
+
+  if (nextMatch) {
+    // if this confirmation filled the last open slot in the next match, that
+    // match just went live — notify both its players
+    const nextRoomPlayer1Id = isPlayer1 ? match.winner_room_player_id : nextMatch.room_player_1_id;
+    const nextRoomPlayer2Id = isPlayer1 ? nextMatch.room_player_2_id : match.winner_room_player_id;
+
+    if (nextRoomPlayer1Id && nextRoomPlayer2Id) {
+      const [p1, p2] = await Promise.all([
+        getRoomPlayerDetails(nextRoomPlayer1Id),
+        getRoomPlayerDetails(nextRoomPlayer2Id),
+      ]);
+      if (p1 && p2) {
+        await Promise.all([
+          sendPushToPlayer(p1.playerId, {
+            title: "Your match is live",
+            body: `${p2.name} — ${room.game} — Round ${match.round_number + 1}`,
+            url: `/room/${code}/player/${p1.token}`,
+          }),
+          sendPushToPlayer(p2.playerId, {
+            title: "Your match is live",
+            body: `${p1.name} — ${room.game} — Round ${match.round_number + 1}`,
+            url: `/room/${code}/player/${p2.token}`,
+          }),
+        ]);
+      }
+    }
+  } else if (winnerDetails) {
+    // final match confirmed — notify everyone in the room
+    const { data: allRoomPlayers } = await supabaseAdmin
+      .from("room_players")
+      .select("id, player_id, player_link_token, players(name)")
+      .eq("room_id", room.id);
+
+    const championName = winnerDetails.name;
+    await Promise.all(
+      (allRoomPlayers ?? []).map((rp) => {
+        const isChampion = rp.id === match.winner_room_player_id;
+        return sendPushToPlayer(rp.player_id, {
+          title: isChampion ? "🏆 You won the bracket!" : "Tournament complete",
+          body: isChampion
+            ? `${room.game} — ${room.code}`
+            : `${championName} won the ${room.game} bracket`,
+          url: `/room/${code}/player/${rp.player_link_token}`,
+        });
+      })
+    );
+  }
 }

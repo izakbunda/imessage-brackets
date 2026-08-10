@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { totalRounds } from "@/lib/bracket";
 import { getPlayerBracketStatus } from "@/lib/player-status";
 import { BracketCanvas } from "@/components/bracket-canvas";
+import { NotificationOptIn } from "@/components/notification-opt-in";
 import { LobbyClient } from "./lobby-client";
 
 export default async function RoomPlayerPage({
@@ -77,6 +78,10 @@ export default async function RoomPlayerPage({
         You&apos;re in as <strong>{viewer.players?.name}</strong>
         {isCreator ? " (creator)" : ""}.
       </p>
+
+      <div className="mb-4">
+        <NotificationOptIn token={token} />
+      </div>
 
       {room.status === "lobby" ? (
         <LobbyClient
