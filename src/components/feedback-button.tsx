@@ -30,8 +30,8 @@ export function FeedbackButton() {
         style={{
           top: "calc(16px + env(safe-area-inset-top))",
           right: 16,
-          width: 32,
-          height: 32,
+          width: 24,
+          height: 24,
           background: "var(--card)",
           color: "var(--foreground)",
           border: "var(--pixel-border)",
