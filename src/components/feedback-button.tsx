@@ -26,17 +26,17 @@ export function FeedbackButton() {
         type="button"
         onClick={() => setOpen(true)}
         whileTap={reducedMotion ? undefined : { scale: 0.9 }}
-        className="fixed z-40 flex items-center justify-center text-sm font-bold"
+        className="fixed z-40 flex items-center justify-center text-xs"
         style={{
-          top: "calc(16px + env(safe-area-inset-top))",
-          right: 16,
-          width: 24,
-          height: 24,
-          background: "var(--card)",
-          color: "var(--foreground)",
-          border: "var(--pixel-border)",
+          top: "calc(12px + env(safe-area-inset-top))",
+          right: 12,
+          width: 18,
+          height: 18,
+          background: "transparent",
+          color: "var(--muted)",
+          border: "1.5px solid var(--border-subtle)",
           borderRadius: 999,
-          boxShadow: "var(--shadow-raised)",
+          opacity: 0.6,
           fontFamily: "var(--font-pixel-display), monospace",
         }}
         aria-label="Send feedback"
