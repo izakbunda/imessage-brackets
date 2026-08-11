@@ -33,6 +33,21 @@ async function findPlayer(query: string): Promise<{ id: string; name: string } |
   return byName[0];
 }
 
+export async function searchPlayers(
+  query: string
+): Promise<{ name: string; phone: string }[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 2) return [];
+
+  const { data } = await supabaseAdmin
+    .from("players")
+    .select("name, phone_number")
+    .or(`name.ilike.%${trimmed}%,phone_number.ilike.%${trimmed}%`)
+    .limit(6);
+
+  return (data ?? []).map((p) => ({ name: p.name, phone: p.phone_number }));
+}
+
 export async function getHeadToHead(queryA: string, queryB: string): Promise<HeadToHeadResult> {
   const [playerA, playerB] = await Promise.all([findPlayer(queryA), findPlayer(queryB)]);
 
@@ -77,4 +92,52 @@ export async function getHeadToHead(queryA: string, queryB: string): Promise<Hea
   }
 
   return { playerAName: playerA.name, playerBName: playerB.name, aWins, bWins, totalMatches };
+}
+
+export type CustomComparisonResult =
+  | { error: string }
+  | { entries: { name: string; wins: number }[] };
+
+// All-time, all-games win counts for an arbitrary set of players — a
+// custom-list variant of the leaderboard rather than a strict 1v1 record.
+export async function getCustomComparison(queries: string[]): Promise<CustomComparisonResult> {
+  const trimmed = queries.map((q) => q.trim()).filter(Boolean);
+  if (trimmed.length < 2) return { error: "Enter at least 2 players." };
+
+  const resolved = await Promise.all(trimmed.map(findPlayer));
+  const firstError = resolved.find((r): r is { error: string } => "error" in r);
+  if (firstError) return { error: firstError.error };
+
+  const players = resolved as { id: string; name: string }[];
+  const uniqueIds = new Set(players.map((p) => p.id));
+  if (uniqueIds.size !== players.length) return { error: "Enter each player only once." };
+
+  const { data: roomPlayers } = await supabaseAdmin
+    .from("room_players")
+    .select("id, player_id")
+    .in("player_id", [...uniqueIds]);
+
+  const playerIdByRoomPlayerId = new Map((roomPlayers ?? []).map((rp) => [rp.id, rp.player_id]));
+  const roomPlayerIds = [...playerIdByRoomPlayerId.keys()];
+
+  const winsByPlayerId = new Map(players.map((p) => [p.id, 0]));
+
+  if (roomPlayerIds.length > 0) {
+    const { data: matches } = await supabaseAdmin
+      .from("matches")
+      .select("winner_room_player_id")
+      .not("confirmed_at", "is", null)
+      .in("winner_room_player_id", roomPlayerIds);
+
+    for (const m of matches ?? []) {
+      const playerId = playerIdByRoomPlayerId.get(m.winner_room_player_id!);
+      if (playerId) winsByPlayerId.set(playerId, (winsByPlayerId.get(playerId) ?? 0) + 1);
+    }
+  }
+
+  const entries = players
+    .map((p) => ({ name: p.name, wins: winsByPlayerId.get(p.id) ?? 0 }))
+    .sort((a, b) => b.wins - a.wins);
+
+  return { entries };
 }

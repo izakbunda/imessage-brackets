@@ -1,7 +1,7 @@
-export const NODE_WIDTH = 190;
-export const NODE_HEIGHT = 76;
-const COLUMN_WIDTH = 250;
-const ROW_UNIT = NODE_HEIGHT + 24;
+export const NODE_WIDTH = 240;
+export const NODE_HEIGHT = 100;
+const COLUMN_WIDTH = 300;
+const ROW_UNIT = NODE_HEIGHT + 28;
 
 export type NodePosition = { x: number; y: number };
 

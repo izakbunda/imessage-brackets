@@ -4,8 +4,10 @@ import "./globals.css";
 import { RegisterServiceWorker } from "./register-sw";
 import { TabBar } from "@/components/tab-bar";
 import { ActiveGameChip } from "@/components/active-game-chip";
-import { PageTransition } from "@/components/page-transition";
 import { AppGate } from "@/components/app-gate";
+import { SiteGate } from "@/components/site-gate";
+import { VersionBanner } from "@/components/version-banner";
+import { FeedbackButton } from "@/components/feedback-button";
 
 const pixelDisplay = Press_Start_2P({
   weight: "400",
@@ -30,11 +32,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col pb-32">
         <div className="scanlines" />
         <RegisterServiceWorker />
-        <AppGate>
-          <PageTransition>{children}</PageTransition>
-          <ActiveGameChip />
-          <TabBar />
-        </AppGate>
+        <SiteGate>
+          <AppGate>
+            <VersionBanner
+              sha={process.env.VERCEL_GIT_COMMIT_SHA}
+              message={process.env.VERCEL_GIT_COMMIT_MESSAGE}
+              repoOwner={process.env.VERCEL_GIT_REPO_OWNER}
+              repoSlug={process.env.VERCEL_GIT_REPO_SLUG}
+            />
+            {children}
+            <ActiveGameChip />
+            <TabBar />
+            <FeedbackButton />
+          </AppGate>
+        </SiteGate>
       </body>
     </html>
   );

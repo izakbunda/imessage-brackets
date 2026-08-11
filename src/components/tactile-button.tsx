@@ -14,15 +14,15 @@ const VARIANT_BG: Record<Variant, string> = {
 };
 
 const VARIANT_TEXT: Record<Variant, string> = {
-  primary: "#23222b",
+  primary: "#3a2f1e",
   secondary: "var(--foreground)",
-  success: "#23222b",
+  success: "#3a2f1e",
 };
 
 const VARIANT_BORDER: Record<Variant, string> = {
-  primary: "3px solid #23222b",
+  primary: "3px solid #3a2f1e",
   secondary: "var(--pixel-border)",
-  success: "3px solid #23222b",
+  success: "3px solid #3a2f1e",
 };
 
 type TactileButtonProps = {

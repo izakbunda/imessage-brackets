@@ -73,7 +73,7 @@ export function ActiveGameChip() {
                 scale: [1, 1.03, 1],
                 boxShadow: [
                   "var(--shadow-raised-lg)",
-                  "0 0 0 8px rgba(217,99,59,0.25)",
+                  "0 0 0 8px rgba(242,121,92,0.3)",
                   "var(--shadow-raised-lg)",
                 ],
               }
@@ -87,8 +87,8 @@ export function ActiveGameChip() {
           className="flex items-center justify-center gap-2 px-4 py-3"
           style={{
             background: "var(--accent-coral)",
-            color: "#23222b",
-            border: "3px solid #23222b",
+            color: "#3a2f1e",
+            border: "3px solid #3a2f1e",
             borderRadius: 999,
             fontFamily: "var(--font-pixel-display), monospace",
             fontSize: 10,

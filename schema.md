@@ -16,7 +16,7 @@ global identity, shared across every room a person ever joins.
 - code (unique, short, for the shareable join link)
 - creator_player_id (fk -> players.id)
 - game (text — single game for the whole bracket)
-- player_count (int — must be power of 2)
+- player_count (int, nullable — fixed target size chosen at creation (2/4/8/16/32), or null for an "open" room where any number of players can join and the creator manually locks it whenever they're ready. Once locked, this is finalized to the actual participant count regardless of which mode was used, since round math needs a real number from then on. Fixed sizes no longer need to be a power of 2 for bracket generation to work — see bye handling below.)
 - seeding_mode (enum: 'auto' | 'manual')
 - status (enum: 'lobby' | 'locked' | 'complete' | 'canceled') — canceled only reachable from lobby
 - created_at
@@ -51,6 +51,8 @@ unique constraint: (room_id, player_id) — enforces "one phone number = one pla
 - confirmed_at (nullable — null = pending confirmation, set = match resolved and bracket can advance)
 
 a match is "resolved" when confirmed_at is set. advancement logic: on confirm, find the round+1 match where slot_in_round = floor(this.slot_in_round / 2) and set its room_player_1_id or room_player_2_id (based on even/odd slot) to winner_room_player_id.
+
+byes (non-power-of-2 player counts): the bracket always has 2^ceil(log2(N)) round-1 slots. Players fill them in order; any shortfall becomes byes — round-1 matches with only one slot filled. Those are auto-resolved the moment the bracket is generated (winner_room_player_id = the lone player, confirmed_at = now) and immediately advanced into their round-2 slot via the same floor(slot/2) rule, with no reporting/confirming needed. See generateBracketSkeleton and resolveByeMatches in the app code.
 
 ## push_subscriptions
 - id (pk)

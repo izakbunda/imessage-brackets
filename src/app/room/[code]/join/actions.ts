@@ -32,7 +32,7 @@ export async function joinRoom(
   if (room.status !== "lobby") {
     return { error: "This room is no longer accepting new players." };
   }
-  if (room.room_players.length >= room.player_count) {
+  if (room.player_count !== null && room.room_players.length >= room.player_count) {
     return { error: "This room is full." };
   }
 

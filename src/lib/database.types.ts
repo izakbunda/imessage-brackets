@@ -230,7 +230,7 @@ export type Database = {
           game: string
           id: string
           locked_at: string | null
-          player_count: number
+          player_count: number | null
           seeding_mode: Database["public"]["Enums"]["seeding_mode"]
           status: Database["public"]["Enums"]["room_status"]
         }
@@ -242,7 +242,7 @@ export type Database = {
           game: string
           id?: string
           locked_at?: string | null
-          player_count: number
+          player_count?: number | null
           seeding_mode: Database["public"]["Enums"]["seeding_mode"]
           status?: Database["public"]["Enums"]["room_status"]
         }
@@ -254,7 +254,7 @@ export type Database = {
           game?: string
           id?: string
           locked_at?: string | null
-          player_count?: number
+          player_count?: number | null
           seeding_mode?: Database["public"]["Enums"]["seeding_mode"]
           status?: Database["public"]["Enums"]["room_status"]
         }

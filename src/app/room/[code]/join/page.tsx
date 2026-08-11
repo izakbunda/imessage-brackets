@@ -21,14 +21,17 @@ export default async function JoinRoomPage({
     <main className="w-full mx-auto max-w-md p-6">
       <h1 className="text-2xl font-semibold mb-2">Join bracket</h1>
       <p className="muted mb-6">
-        {room.game} — {room.room_players.length}/{room.player_count} players
+        {room.game} —{" "}
+        {room.player_count === null
+          ? `${room.room_players.length} joined`
+          : `${room.room_players.length}/${room.player_count} players`}
       </p>
 
       {room.status !== "lobby" ? (
         <p className="text-sm muted">
           This room is no longer accepting new players.
         </p>
-      ) : room.room_players.length >= room.player_count ? (
+      ) : room.player_count !== null && room.room_players.length >= room.player_count ? (
         <p className="text-sm muted">This room is full.</p>
       ) : (
         <JoinForm code={code} />

@@ -3,65 +3,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
+import { PixelTrophy } from "@/components/pixel-trophy";
 
-const CONFETTI_COLORS = ["#d9633b", "#4f9e94", "#d9a13e", "#7fa563", "#e8d9c4"];
-
-const PX = 8;
-
-// 15x16 pixel-art trophy: R = cup rim/body, H = handle, S = stem, B = base.
-const TROPHY_GRID = [
-  "...RRRRRRRRR...",
-  "..RRRRRRRRRRR..",
-  ".RRRRRRRRRRRRR.",
-  "HRRRRRRRRRRRRRH",
-  "HRRRRRRRRRRRRRH",
-  ".HRRRRRRRRRRRH.",
-  "..RRRRRRRRRRR..",
-  "...RRRRRRRRR...",
-  ".....RRRRR.....",
-  "......SSS......",
-  "......SSS......",
-  ".....BBBBB.....",
-  "....BBBBBBB....",
-  "....BBBBBBB....",
-  "...BBBBBBBBB...",
-  "...BBBBBBBBB...",
-];
-
-function PixelTrophy({ variant }: { variant: "champion" | "runnerup" }) {
-  const gold = variant === "champion";
-  const colors: Record<string, string> = gold
-    ? { R: "#e0b84a", H: "#b8791f", S: "#b8791f", B: "#8a5a16" }
-    : { R: "#8b8794", H: "#5c5865", S: "#5c5865", B: "#46424f" };
-  const highlightRows = new Set([0, 1]);
-
-  return (
-    <svg
-      width={TROPHY_GRID[0].length * PX}
-      height={TROPHY_GRID.length * PX}
-      viewBox={`0 0 ${TROPHY_GRID[0].length * PX} ${TROPHY_GRID.length * PX}`}
-      style={{ imageRendering: "pixelated" }}
-    >
-      {TROPHY_GRID.map((row, y) =>
-        [...row].map((cell, x) => {
-          if (cell === ".") return null;
-          const fill = highlightRows.has(y) && cell === "R" ? lighten(colors.R) : colors[cell];
-          return (
-            <rect key={`${x}-${y}`} x={x * PX} y={y * PX} width={PX} height={PX} fill={fill} />
-          );
-        })
-      )}
-    </svg>
-  );
-}
-
-function lighten(hex: string) {
-  const n = parseInt(hex.slice(1), 16);
-  const r = Math.min(255, ((n >> 16) & 255) + 45);
-  const g = Math.min(255, ((n >> 8) & 255) + 45);
-  const b = Math.min(255, (n & 255) + 45);
-  return `rgb(${r},${g},${b})`;
-}
+const CONFETTI_COLORS = ["#f2795c", "#3a7d55", "#e0a72e", "#6fae63", "#ec6fa0", "#8b7fd1"];
 
 function Sparkles({ color }: { color: string }) {
   const [sparkles] = useState(() =>
@@ -162,7 +106,7 @@ export function TournamentCelebration({
       transition={{ duration: 0.3 }}
       onClick={() => setDismissing(true)}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 overflow-hidden"
-      style={{ background: "#0d0c12" }}
+      style={{ background: "#2a2013" }}
     >
       {!reducedMotion && (
         <motion.div

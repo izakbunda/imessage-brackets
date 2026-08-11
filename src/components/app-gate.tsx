@@ -4,22 +4,24 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { isStandalone } from "@/lib/pwa";
 import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
-import { TvStatic } from "@/components/tv-static";
+import { PixelTrophy } from "@/components/pixel-trophy";
 
 // Hard gate: the whole app sits behind this until launched from a
 // home-screen icon — web push only works on iOS that way (Safari 16.4+),
 // per ideas.md. Nothing past this point is reachable in a regular tab.
 export function AppGate({ children }: { children: React.ReactNode }) {
-  const [standalone, setStandalone] = useState<boolean | null>(null);
+  const gateDisabled = process.env.NEXT_PUBLIC_DISABLE_PWA_GATE === "1";
+  const [standalone, setStandalone] = useState<boolean | null>(gateDisabled ? true : null);
   const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
+    if (gateDisabled) return;
     setStandalone(isStandalone());
     const query = window.matchMedia("(display-mode: standalone)");
     const listener = () => setStandalone(isStandalone());
     query.addEventListener("change", listener);
     return () => query.removeEventListener("change", listener);
-  }, []);
+  }, [gateDisabled]);
 
   if (standalone === null) return null;
 
@@ -29,7 +31,6 @@ export function AppGate({ children }: { children: React.ReactNode }) {
         className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden"
         style={{ background: "var(--background)" }}
       >
-        <TvStatic />
         <div
           className="absolute inset-0"
           style={{
@@ -41,9 +42,10 @@ export function AppGate({ children }: { children: React.ReactNode }) {
           initial={{ scale: 0, rotate: -12 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 18 }}
-          className="relative text-6xl"
+          className="relative"
+          style={{ filter: "drop-shadow(0 0 14px rgba(224,184,74,0.5))" }}
         >
-          🏆
+          <PixelTrophy variant="champion" />
         </motion.div>
 
         <div className="relative text-center">
@@ -63,7 +65,7 @@ export function AppGate({ children }: { children: React.ReactNode }) {
           animate={
             reducedMotion
               ? undefined
-              : { boxShadow: ["var(--shadow-raised)", "0 0 0 8px rgba(79,158,148,0.25)", "var(--shadow-raised)"] }
+              : { boxShadow: ["var(--shadow-raised)", "0 0 0 8px rgba(58,125,85,0.3)", "var(--shadow-raised)"] }
           }
           transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
           className="relative tactile-card p-4 flex flex-col gap-3 w-full max-w-xs"

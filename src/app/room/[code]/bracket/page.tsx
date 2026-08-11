@@ -40,7 +40,14 @@ export default async function BracketPage({
       {(room.status === "locked" || room.status === "complete") && (
         <BracketCanvas
           code={code}
-          initialRoom={{ id: room.id, code: room.code, status: room.status, player_count: room.player_count, game: room.game }}
+          initialRoom={{
+            id: room.id,
+            code: room.code,
+            status: room.status,
+            // finalized to the real participant count at lock time
+            player_count: room.player_count ?? (roomPlayers ?? []).length,
+            game: room.game,
+          }}
           initialRoomPlayers={(roomPlayers ?? []).map((p) => ({ id: p.id, name: p.players?.name ?? "Unknown" }))}
           initialMatches={matches ?? []}
         />

@@ -1,6 +1,6 @@
 import { GAMES } from "@/lib/games";
 import { getLeaderboard, type Period } from "./queries";
-import { HeadToHead } from "./head-to-head";
+import { HeadToHeadModal } from "./head-to-head-modal";
 import { LeaderboardFilters } from "./filters";
 
 export default async function LeaderboardPage({
@@ -34,46 +34,35 @@ export default async function LeaderboardPage({
         )}
       </div>
 
-      <div className="tactile-card p-3">
-        <HeadToHead />
-      </div>
+      <HeadToHeadModal />
     </main>
   );
 }
 
-const MEDAL_COLORS: Record<number, [string, string]> = {
-  1: ["#ffd76a", "#e0a415"],
-  2: ["#e2e6ec", "#a7adb8"],
-  3: ["#e8b487", "#b1723c"],
+const MEDAL_TEXT_COLORS: Record<number, string> = {
+  1: "#c98a12",
+  2: "#8b8f99",
+  3: "#a1652f",
 };
 
-const AVATAR_COLORS = ["var(--accent-coral)", "var(--accent-teal)", "var(--accent-mustard)", "var(--accent-sage)"];
-
-function avatarColor(name: string) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-}
-
 function LeaderboardRow({ rank, name, wins }: { rank: number; name: string; wins: number }) {
-  const medal = MEDAL_COLORS[rank];
+  const medalColor = MEDAL_TEXT_COLORS[rank];
   return (
     <li
-      className="flex items-center gap-2 px-2.5 py-1.5"
+      className="flex items-center gap-3 px-2.5 py-1.5"
       style={{
         background: "var(--card)",
         color: "var(--card-foreground)",
         borderRadius: "var(--radius-card)",
         boxShadow: "var(--shadow-raised)",
-        border: medal ? `2px solid ${medal[1]}` : "2px solid var(--accent-teal)",
+        border: medalColor ? `2px solid ${medalColor}` : "2px solid var(--accent-teal)",
       }}
     >
-      <RankBadge rank={rank} medal={medal} />
       <span
-        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-        style={{ background: avatarColor(name), color: "#23222b" }}
+        className="w-5 text-center text-sm font-bold shrink-0"
+        style={{ color: medalColor ?? "var(--muted)" }}
       >
-        {name.slice(0, 1).toUpperCase()}
+        {rank}
       </span>
       <span className="flex-1 truncate text-sm">{name}</span>
       <span className="font-semibold text-right text-sm" style={{ minWidth: 20 }}>
@@ -83,27 +72,5 @@ function LeaderboardRow({ rank, name, wins }: { rank: number; name: string; wins
         wins
       </span>
     </li>
-  );
-}
-
-function RankBadge({ rank, medal }: { rank: number; medal?: [string, string] }) {
-  if (!medal) {
-    return (
-      <span className="w-5 text-center text-xs shrink-0" style={{ color: "var(--muted)" }}>
-        {rank}
-      </span>
-    );
-  }
-  const [light, dark] = medal;
-  return (
-    <span
-      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-      style={{
-        background: `linear-gradient(145deg, ${light}, ${dark})`,
-        boxShadow: `var(--shadow-raised), inset 0 1px 1px rgba(255,255,255,0.5)`,
-      }}
-    >
-      {rank}
-    </span>
   );
 }

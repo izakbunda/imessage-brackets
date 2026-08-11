@@ -48,7 +48,10 @@ export default async function RoomPlayerPage({
       .select("*")
       .eq("room_id", room.id);
 
-    const finalRound = totalRounds(room.player_count);
+    // player_count is finalized to the real participant count at lock time
+    // (see generateAndLock) — safe to assume non-null once locked/complete
+    const playerCount = room.player_count ?? safeRoomPlayers.length;
+    const finalRound = totalRounds(playerCount);
     const { eliminated, champion } = getPlayerBracketStatus(matches ?? [], viewer.id, finalRound);
 
     bracketSection = (
@@ -59,7 +62,7 @@ export default async function RoomPlayerPage({
         )}
         <BracketCanvas
           code={code}
-          initialRoom={{ id: room.id, code: room.code, status: room.status, player_count: room.player_count, game: room.game }}
+          initialRoom={{ id: room.id, code: room.code, status: room.status, player_count: playerCount, game: room.game }}
           initialRoomPlayers={safeRoomPlayers.map((p) => ({ id: p.id, name: p.name }))}
           initialMatches={matches ?? []}
           token={token}

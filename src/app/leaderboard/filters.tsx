@@ -69,7 +69,7 @@ export function LeaderboardFilters({
               className="flex-1 px-2 py-1.5 text-xs font-medium"
               style={{
                 background: active ? "var(--accent-teal)" : "transparent",
-                color: active ? "#23222b" : "var(--foreground)",
+                color: active ? "#3a2f1e" : "var(--foreground)",
               }}
             >
               {p.label}

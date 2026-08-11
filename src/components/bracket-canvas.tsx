@@ -197,6 +197,7 @@ export function BracketCanvas({
                     isWinner={!!m.confirmed_at && m.winner_room_player_id === m.room_player_1_id}
                     isLoser={!!m.confirmed_at && m.winner_room_player_id === m.room_player_2_id}
                     isViewer={m.room_player_1_id === viewerRoomPlayerId}
+                    isBye={!m.room_player_1_id && !!m.confirmed_at}
                   />
                   <div style={{ height: 1, background: "var(--border-subtle)" }} />
                   <MatchSlot
@@ -205,11 +206,12 @@ export function BracketCanvas({
                     isWinner={!!m.confirmed_at && m.winner_room_player_id === m.room_player_2_id}
                     isLoser={!!m.confirmed_at && m.winner_room_player_id === m.room_player_1_id}
                     isViewer={m.room_player_2_id === viewerRoomPlayerId}
+                    isBye={!m.room_player_2_id && !!m.confirmed_at}
                   />
                   {!m.confirmed_at && m.reported_by_room_player_id && (
                     <span
-                      className="text-[9px] px-2 py-0.5 truncate"
-                      style={{ color: "#23222b", background: "var(--accent-mustard)" }}
+                      className="text-[10px] px-3 py-1 truncate"
+                      style={{ color: "#3a2f1e", background: "var(--accent-mustard)" }}
                     >
                       awaiting confirmation
                     </span>
@@ -277,38 +279,40 @@ function MatchSlot({
   isWinner,
   isLoser,
   isViewer,
+  isBye,
 }: {
   name: string | null;
   score: number | null;
   isWinner: boolean;
   isLoser: boolean;
   isViewer: boolean;
+  isBye?: boolean;
 }) {
   return (
     <div
-      className="flex-1 flex items-center gap-1.5 px-2"
+      className="flex-1 flex items-center gap-2.5 px-3"
       style={{
-        background: isWinner ? "rgba(127, 165, 99, 0.18)" : "transparent",
+        background: isWinner ? "rgba(111, 174, 99, 0.22)" : "transparent",
         opacity: isLoser ? 0.5 : 1,
       }}
     >
       <span
-        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+        className="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
         style={{
           background: name ? avatarColor(name) : "var(--border-subtle)",
-          color: "#23222b",
+          color: "#3a2f1e",
         }}
       >
         {name ? name.slice(0, 1).toUpperCase() : "?"}
       </span>
       <span
-        className={`flex-1 truncate ${isWinner ? "font-semibold" : ""}`}
+        className={`flex-1 truncate text-base ${isWinner ? "font-semibold" : ""}`}
         style={{ color: !name ? "var(--border-subtle)" : isViewer ? "var(--accent-blue)" : "inherit" }}
       >
-        {name ?? "TBD"}
+        {name ?? (isBye ? "— bye —" : "TBD")}
       </span>
       {isWinner && <span style={{ color: "var(--accent-sage)" }}>▲</span>}
-      {score !== null && <span className="muted text-xs">{score}</span>}
+      {score !== null && <span className="muted text-sm">{score}</span>}
     </div>
   );
 }

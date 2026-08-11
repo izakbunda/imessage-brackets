@@ -20,7 +20,7 @@ type RoomView = {
   code: string;
   status: string;
   seeding_mode: "auto" | "manual";
-  player_count: number;
+  player_count: number | null;
   game: string;
 };
 
@@ -39,6 +39,7 @@ export function LobbyClient({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [seedOrder, setSeedOrder] = useState<string[]>(roomPlayers.map((p) => p.id));
+  const [manualReady, setManualReady] = useState(false);
 
   useEffect(() => {
     const channel = supabase.channel(`room:${room.id}`);
@@ -49,9 +50,15 @@ export function LobbyClient({
     };
   }, [room.id, router]);
 
-  const full = roomPlayers.length >= room.player_count;
+  const isOpen = room.player_count === null;
+  const full = !isOpen && roomPlayers.length >= room.player_count!;
+  const readyToLock = isOpen ? roomPlayers.length >= 2 : full;
   const showSeedingScreen =
-    room.status === "lobby" && room.seeding_mode === "manual" && isCreator && full;
+    room.status === "lobby" &&
+    room.seeding_mode === "manual" &&
+    isCreator &&
+    readyToLock &&
+    (full || manualReady);
 
   function runAction(action: () => Promise<void>) {
     setError(null);
@@ -84,7 +91,8 @@ export function LobbyClient({
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm muted">
-        {roomPlayers.length}/{room.player_count} players — {room.seeding_mode} seeding
+        {isOpen ? `${roomPlayers.length} joined` : `${roomPlayers.length}/${room.player_count} players`}{" "}
+        — {room.seeding_mode} seeding
       </p>
 
       {isCreator && room.status === "lobby" && !full && (
@@ -158,13 +166,20 @@ export function LobbyClient({
           >
             Cancel room
           </TactileButton>
-          {room.seeding_mode === "auto" && (
+          {room.seeding_mode === "auto" ? (
             <TactileButton
               onClick={() => runAction(() => lockRoomAuto(room.code, playerToken))}
-              disabled={pending || !full}
+              disabled={pending || !readyToLock}
             >
               Lock &amp; generate bracket
             </TactileButton>
+          ) : (
+            isOpen &&
+            readyToLock && (
+              <TactileButton onClick={() => setManualReady(true)} disabled={pending}>
+                Set up seeding
+              </TactileButton>
+            )
           )}
         </div>
       )}

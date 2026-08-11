@@ -2,8 +2,8 @@ import { createRoom } from "./actions";
 import { GAMES } from "@/lib/games";
 import { TactileButton } from "@/components/tactile-button";
 import { ProfileFields } from "@/components/profile-fields";
-
-const PLAYER_COUNT_OPTIONS = [2, 4, 8, 16, 32];
+import { RoomSizePicker } from "@/components/room-size-picker";
+import { SeedingModePicker } from "@/components/seeding-mode-picker";
 
 export default function CreateRoomPage() {
   return (
@@ -14,7 +14,7 @@ export default function CreateRoomPage() {
 
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Game</span>
-          <select name="game" required className="tactile-input px-3 py-2.5">
+          <select name="game" required defaultValue="Word Hunt" className="tactile-input px-3 py-2.5">
             {GAMES.map((game) => (
               <option key={game} value={game}>
                 {game}
@@ -23,28 +23,9 @@ export default function CreateRoomPage() {
           </select>
         </label>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Number of players</span>
-          <select name="playerCount" required defaultValue={4} className="tactile-input px-3 py-2.5">
-            {PLAYER_COUNT_OPTIONS.map((count) => (
-              <option key={count} value={count}>
-                {count}
-              </option>
-            ))}
-          </select>
-        </label>
+        <RoomSizePicker />
 
-        <fieldset className="flex flex-col gap-1">
-          <legend className="text-sm font-medium mb-1">Seeding</legend>
-          <label className="flex items-center gap-2">
-            <input type="radio" name="seedingMode" value="auto" defaultChecked />
-            Automatic (random)
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="radio" name="seedingMode" value="manual" />
-            Manual (I&apos;ll set it myself)
-          </label>
-        </fieldset>
+        <SeedingModePicker />
 
         <TactileButton type="submit" className="mt-2">
           Create room

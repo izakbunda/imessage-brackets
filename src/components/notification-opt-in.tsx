@@ -68,7 +68,7 @@ export function NotificationOptIn({ token }: { token: string }) {
     <motion.div
       animate={
         status === "off" && !reducedMotion
-          ? { boxShadow: ["var(--shadow-raised)", "0 0 0 6px rgba(79,158,148,0.25)", "var(--shadow-raised)"] }
+          ? { boxShadow: ["var(--shadow-raised)", "0 0 0 6px rgba(58,125,85,0.3)", "var(--shadow-raised)"] }
           : undefined
       }
       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}

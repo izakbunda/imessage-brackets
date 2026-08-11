@@ -5,40 +5,58 @@ export type BracketMatchSkeleton = {
   roomPlayer2Id: string | null;
 };
 
+// Smallest power of 2 that fits playerCount — non-power-of-2 fields (e.g. 5
+// players) pad up to this with byes rather than needing an exact count.
 export function totalRounds(playerCount: number): number {
-  return Math.log2(playerCount);
-}
-
-function isPowerOfTwo(n: number): boolean {
-  return n >= 2 && (n & (n - 1)) === 0;
+  return Math.ceil(Math.log2(playerCount));
 }
 
 // Builds the full single-elimination match tree for a room: round 1 is
-// seeded from orderedRoomPlayerIds (slot i = seeds 2i vs 2i+1), every later
-// round is an empty skeleton filled in as matches resolve (see nextSlot).
+// seeded from orderedRoomPlayerIds (in order), every later round is an
+// empty skeleton filled in as matches resolve (see nextSlot).
+//
+// When playerCount isn't a power of 2, the shortfall becomes byes: the
+// last `byes` round-1 slots each get a single player (no opponent) instead
+// of a real pairing — those players skip round 1 and advance straight to
+// round 2 (see resolveByeMatches in actions.ts, which auto-confirms them
+// right after this skeleton is inserted).
 export function generateBracketSkeleton(
   orderedRoomPlayerIds: string[]
 ): BracketMatchSkeleton[] {
   const playerCount = orderedRoomPlayerIds.length;
-  if (!isPowerOfTwo(playerCount)) {
-    throw new Error("player count must be a power of 2, at least 2");
+  if (playerCount < 2) {
+    throw new Error("Need at least 2 players.");
   }
 
   const rounds = totalRounds(playerCount);
+  const nextPow2 = 2 ** rounds;
+  const pairs = nextPow2 / 2;
+  const byes = nextPow2 - playerCount;
+  const fullPairs = pairs - byes;
+
   const matches: BracketMatchSkeleton[] = [];
 
-  const round1Matches = playerCount / 2;
-  for (let slot = 0; slot < round1Matches; slot++) {
-    matches.push({
-      roundNumber: 1,
-      slotInRound: slot,
-      roomPlayer1Id: orderedRoomPlayerIds[slot * 2],
-      roomPlayer2Id: orderedRoomPlayerIds[slot * 2 + 1],
-    });
+  let idx = 0;
+  for (let slot = 0; slot < pairs; slot++) {
+    if (slot < fullPairs) {
+      matches.push({
+        roundNumber: 1,
+        slotInRound: slot,
+        roomPlayer1Id: orderedRoomPlayerIds[idx++],
+        roomPlayer2Id: orderedRoomPlayerIds[idx++],
+      });
+    } else {
+      matches.push({
+        roundNumber: 1,
+        slotInRound: slot,
+        roomPlayer1Id: orderedRoomPlayerIds[idx++],
+        roomPlayer2Id: null,
+      });
+    }
   }
 
   for (let round = 2; round <= rounds; round++) {
-    const matchesInRound = playerCount / Math.pow(2, round);
+    const matchesInRound = nextPow2 / Math.pow(2, round);
     for (let slot = 0; slot < matchesInRound; slot++) {
       matches.push({
         roundNumber: round,

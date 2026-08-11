@@ -12,7 +12,7 @@ export async function createRoom(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
   const game = String(formData.get("game") ?? "");
-  const playerCount = Number(formData.get("playerCount"));
+  const playerCountRaw = String(formData.get("playerCount") ?? "");
   const seedingMode = String(formData.get("seedingMode") ?? "auto");
 
   if (!name || !phoneNumber) {
@@ -21,8 +21,9 @@ export async function createRoom(formData: FormData) {
   if (!(GAMES as readonly string[]).includes(game)) {
     throw new Error("Invalid game selection.");
   }
-  if (!PLAYER_COUNT_OPTIONS.includes(playerCount)) {
-    throw new Error("Player count must be a power of 2, up to 32.");
+  const playerCount = playerCountRaw === "open" ? null : Number(playerCountRaw);
+  if (playerCount !== null && !PLAYER_COUNT_OPTIONS.includes(playerCount)) {
+    throw new Error("Player count must be a power of 2, up to 32, or open.");
   }
   if (seedingMode !== "auto" && seedingMode !== "manual") {
     throw new Error("Invalid seeding mode.");

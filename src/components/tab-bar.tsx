@@ -90,7 +90,7 @@ export function TabBar() {
               style={{
                 fontFamily: "var(--font-pixel-display), monospace",
                 fontSize: 8,
-                color: active ? "#23222b" : "var(--muted)",
+                color: active ? "#3a2f1e" : "var(--muted)",
               }}
             >
               {active && (
@@ -103,7 +103,7 @@ export function TabBar() {
                     position: "absolute",
                     inset: 0,
                     background: color,
-                    borderRadius: 999,
+                    borderRadius: 16,
                   }}
                 />
               )}
@@ -112,7 +112,7 @@ export function TabBar() {
                 transition={{ duration: 0.35, ease: "easeOut" }}
                 className="relative flex items-center gap-1.5"
               >
-                <PixelIcon grid={grid} color={active ? "#23222b" : "var(--muted)"} />
+                <PixelIcon grid={grid} color={active ? "#3a2f1e" : "var(--muted)"} />
                 {label}
               </motion.span>
             </Link>

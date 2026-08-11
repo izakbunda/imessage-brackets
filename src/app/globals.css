@@ -1,31 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #23222b;
-  --background-alt: #2f2d3a;
-  --foreground: #f2ede3;
-  --muted: #9c96a8;
-  --card: #2f2d3a;
-  --card-foreground: #f2ede3;
+  /* Super Game Boy-inspired light theme: warm yellow base, four shell
+     colors (coral, green, mustard/gold, sage) as accents. --accent-teal
+     keeps its name for minimal refactor but is now a forest green. */
+  --background: #f6e6a8;
+  --background-alt: #f4d35e;
+  --foreground: #3a2f1e;
+  --muted: #8f7f52;
+  --card: #fffdf5;
+  --card-foreground: #3a2f1e;
 
-  --accent-coral: #d9633b;
-  --accent-teal: #4f9e94;
-  --accent-mustard: #d9a13e;
-  --accent-sage: #7fa563;
-  --accent-red: #c2554f;
+  --accent-coral: #f2795c;
+  --accent-teal: #3a7d55;
+  --accent-mustard: #e0a72e;
+  --accent-sage: #6fae63;
+  --accent-red: #d1495b;
+  --accent-pink: #ec6fa0;
+  --accent-purple: #8b7fd1;
 
   --accent-blue: var(--accent-teal);
-  --accent-blue-pressed: #3f8178;
+  --accent-blue-pressed: #2c5f40;
   --accent-green: var(--accent-sage);
-  --accent-green-pressed: #6a8e51;
+  --accent-green-pressed: #56904c;
 
-  --border-subtle: rgba(156, 150, 168, 0.35);
+  --border-subtle: rgba(58, 47, 30, 0.25);
 
   --pixel-border: 3px solid var(--accent-teal);
-  --pixel-shadow: 4px 4px 0 0 rgba(0, 0, 0, 0.5);
+  --pixel-shadow: 4px 4px 0 0 rgba(40, 30, 15, 0.35);
   --shadow-raised: var(--pixel-shadow);
-  --shadow-raised-lg: 6px 6px 0 0 rgba(0, 0, 0, 0.5);
-  --shadow-inset: inset 2px 2px 0 rgba(0, 0, 0, 0.35);
+  --shadow-raised-lg: 6px 6px 0 0 rgba(40, 30, 15, 0.35);
+  --shadow-inset: inset 2px 2px 0 rgba(40, 30, 15, 0.25);
 
   --radius-card: 4px;
   --radius-button: 4px;
@@ -87,7 +92,7 @@ h2 {
 }
 
 .tactile-input {
-  background: var(--background);
+  background: var(--card);
   color: var(--foreground);
   border-radius: 2px;
   border: 2px solid var(--border-subtle);
@@ -106,7 +111,7 @@ h2 {
 }
 
 select.tactile-input option {
-  background: var(--background);
+  background: var(--card);
   color: var(--foreground);
 }
 

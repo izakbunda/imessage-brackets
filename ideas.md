@@ -8,7 +8,9 @@ imessage brackets
     1. create "room"
         - create a room
         - choose one imessage game for the whole bracket (creator provides list of games available for now)
-        - choose number of players (must be power of 2: 2/4/8/16/32, capped at 32 for v1)
+        - choose number of players: a fixed target (2/4/8/16/32, capped at 32 for v1), or "open" — no cap, any number of players can join and the creator manually locks the room whenever they're ready
+        - fixed-size rooms lock automatically-enabled once full; open rooms can be locked by the creator as soon as there are at least 2 players
+        - non-power-of-2 player counts (only reachable via open rooms) are handled with byes: leftover players who don't get a round-1 opponent auto-advance straight to round 2, no action needed from them
         - choose seeding mode: automatic (random) or manual (creator sets it themselves) — decided at creation time
         - creator of room will immediately be the first player
         - room gets a short shareable code/link — code is human-friendly words (e.g. "swift-tiger-42" style), not raw alphanumeric
@@ -28,7 +30,8 @@ imessage brackets
         - once locked, no canceling — matches the "keep history" decision
 
     3. lock room / generate bracket
-        - creator locks the room once player cap is reached (can't lock early — must be full)
+        - fixed-size rooms: creator locks once the player cap is reached (can't lock early — must be full)
+        - open rooms: creator can lock any time once there are at least 2 players
         - if automatic seeding: locking immediately generates the bracket and goes live
         - if manual seeding: locking opens a seeding screen for the creator to arrange matchups by hand, then they confirm to generate and go live
         - single elimination only — no losers bracket, no 3rd place / consolation match, bracket ends at the final
